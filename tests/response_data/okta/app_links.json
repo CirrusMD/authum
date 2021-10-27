@@ -1,0 +1,50 @@
+[
+  {
+    "id": "00ub0oNGTSWTBKOLGLNR",
+    "label": "Google Apps Mail",
+    "linkUrl": "https://${yourOktaDomain}/home/google/0oa3omz2i9XRNSRIHBZO/50",
+    "logoUrl": "https://${yourOktaDomain}/img/logos/google-mail.png",
+    "appName": "google",
+    "appInstanceId": "0oa3omz2i9XRNSRIHBZO",
+    "appAssignmentId": "0ua3omz7weMMMQJERBKY",
+    "credentialsSetup": false,
+    "hidden": false,
+    "sortOrder": 0
+  },
+  {
+    "id": "00ub0oNGTSWTBKOLGLNR",
+    "label": "Google Apps Calendar",
+    "linkUrl": "https://${yourOktaDomain}/home/google/0oa3omz2i9XRNSRIHBZO/54",
+    "logoUrl": "https://${yourOktaDomain}/img/logos/google-calendar.png",
+    "appName": "google",
+    "appInstanceId": "0oa3omz2i9XRNSRIHBZO",
+    "appAssignmentId": "0ua3omz7weMMMQJERBKY",
+    "credentialsSetup": false,
+    "hidden": false,
+    "sortOrder": 1
+  },
+  {
+    "id": "00ub0oNGTSWTBKOLGLNR",
+    "label": "Box",
+    "linkUrl": "https://${yourOktaDomain}/home/boxnet/0oa3ompioiQCSTOYXVBK/72",
+    "logoUrl": "https://${yourOktaDomain}/img/logos/box.png",
+    "appName": "boxnet",
+    "appInstanceId": "0oa3ompioiQCSTOYXVBK",
+    "appAssignmentId": "0ua3omx46lYEZLPPRWBO",
+    "credentialsSetup": false,
+    "hidden": false,
+    "sortOrder": 3
+  },
+  {
+    "id": "00ub0oNGTSWTBKOLGLNR",
+    "label": "Salesforce.com",
+    "linkUrl": "https://${yourOktaDomain}/home/salesforce/0oa12ecnxtBQMKOXJSMF/46",
+    "logoUrl": "https://${yourOktaDomain}/img/logos/salesforce_logo.png",
+    "appName": "salesforce",
+    "appInstanceId": "0oa12ecnxtBQMKOXJSMF",
+    "appAssignmentId": "0ua173qgj5VAVOBQMCVB",
+    "credentialsSetup": true,
+    "hidden": false,
+    "sortOrder": 2
+  }
+]

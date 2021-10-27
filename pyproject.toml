@@ -1,0 +1,43 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "authum"
+version = "0.1.0"
+description = "Awesome SAML authentication tool for connecting command line applications to SAML identity and service providers."
+authors = ["CirrusMD <devops@cirrusmd.com>"]
+homepage = "https://github.com/CirrusMD/authum"
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.10"
+
+arn = "^0.1"
+beautifulsoup4 = "^4.10"
+boto3 = "^1.19"
+click = "^8.0"
+Flask = "^2.0"
+keyring = "^23.2"
+pluggy = "^1.0"
+pyyaml = "^6.0"
+requests = "^2.26"
+rich = "^10.12"
+
+[tool.poetry.dev-dependencies]
+black = "*"
+Mako = "^1.1"
+pex = "^2.1"
+pytest = "^6.2"
+pytest-cov = "^3.0"
+pytest-xdist = "^2.4"
+responses = "^0.15"
+
+[tool.poetry.scripts]
+athm = "authum.cli:main"
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
+
+[tool.pytest.ini_options]
+log_level = "DEBUG"

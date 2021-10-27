@@ -1,0 +1,27 @@
+name: Continuous integration
+
+on: push
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          pip3 install --upgrade pip
+          pip3 install poetry
+          poetry install
+
+      - name: Lint and test
+        run: make ci
+
+      - name: Build
+        run: make pex
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: dist/*

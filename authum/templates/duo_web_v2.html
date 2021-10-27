@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>{{name}} | Authum</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="color-scheme" content="light dark">
+    <style>
+        body {
+            align-items: center;
+            display: flex;
+            flex-direction: column;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        #duo_iframe {
+            width: 100%;
+            min-width: 304px;
+            max-width: 620px;
+            height: 330px;
+            border: none;
+        }
+    </style>
+</head>
+
+<body>
+    <h3>Authum | {{ name }}</h3>
+    <script src="{{ script_url }}"></script>
+    <script>
+        Duo.init({
+            'host': '{{ host }}',
+            'sig_request': '{{ sig_request }}',
+            'post_action': '{{ post_action }}',
+            'post_argument': '{{ post_argument }}'
+        });
+        window.Duo = Duo
+    </script>
+    <iframe id="duo_iframe"></iframe>
+    <form id="duo_form" method="POST">
+        {% for name, value in duo_form_args.items() %}
+        <input type="hidden" name="{{ name }}" value="{{ value }}" />
+        {% endfor %}
+    </form>
+</body>
+
+</html>

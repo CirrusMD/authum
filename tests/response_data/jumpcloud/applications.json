@@ -1,0 +1,38 @@
+[
+  {
+    "_id": "",
+    "name": "github-com",
+    "ssoUrl": "https://sso.jumpcloud.com/saml2/github-com",
+    "displayLabel": "GitHub",
+    "active": true,
+    "organization": "",
+    "config": null,
+    "color": "",
+    "logo": {
+      "url": "https://s3.amazonaws.com/static.jumpcloud.com/applications/logos/application-icon-github-com.png",
+      "color": ""
+    },
+    "description": "",
+    "sso": {
+      "type": "saml"
+    }
+  },
+  {
+    "_id": "",
+    "name": "bookmark",
+    "ssoUrl": "https://mail.google.com/",
+    "displayLabel": "Google Mail",
+    "active": true,
+    "organization": "",
+    "config": null,
+    "color": "",
+    "logo": {
+      "url": "https://assets.jumpcloud.com/images/applications/617722924f8b5955e970cea1.png",
+      "color": ""
+    },
+    "description": "",
+    "sso": {
+      "type": "bookmark"
+    }
+  }
+]

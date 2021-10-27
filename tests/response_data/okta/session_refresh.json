@@ -1,0 +1,46 @@
+{
+  "id": "101W_juydrDRByB7fUdRyE2JQ",
+  "login": "user@example.com",
+  "userId": "00u0abcdefGHIJKLMNOP",
+  "status": "ACTIVE",
+  "createdAt": "2016-01-03T07:02:00.000Z",
+  "expiresAt": "2016-01-03T09:13:17.000Z",
+  "lastPasswordVerification": "2016-01-03T07:02:00.000Z",
+  "lastFactorVerification": null,
+  "amr": [
+    "pwd"
+  ],
+  "idp": {
+    "id": "01a2bcdef3GHIJKLMNOP",
+    "type": "OKTA"
+  },
+  "mfaActive": true,
+  "_links": {
+    "refresh": {
+      "href": "https://${yourOktaDomain}/api/v1/sessions/me/lifecycle/refresh",
+      "hints": {
+        "allow": [
+          "POST"
+        ]
+      }
+    },
+    "self": {
+      "href": "https://${yourOktaDomain}/api/v1/sessions/me",
+      "hints": {
+        "allow": [
+          "GET",
+          "DELETE"
+        ]
+      }
+    },
+    "user": {
+      "name": "Isaac Brock",
+      "href": "https://${yourOktaDomain}/api/v1/users/me",
+      "hints": {
+        "allow": [
+          "GET"
+        ]
+      }
+    }
+  }
+}

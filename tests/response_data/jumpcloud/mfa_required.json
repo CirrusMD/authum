@@ -1,0 +1,13 @@
+{
+    "factors": [
+        {
+            "type": "duo",
+            "status": "unavailable"
+        },
+        {
+            "type": "totp",
+            "status": "available"
+        }
+    ],
+    "message": "MFA required."
+}

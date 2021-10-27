@@ -1,0 +1,68 @@
+{
+    "addresses": [
+        {
+            "_id": "6140c72b754f9551e6200a55",
+            "type": "work",
+            "poBox": "",
+            "extendedAddress": "",
+            "streetAddress": "123 Fake St",
+            "locality": "Springfield",
+            "region": "Colorado",
+            "postalCode": "12345",
+            "country": "United States"
+        },
+        {
+            "_id": "6140c72b754f9551e6200a54",
+            "type": "home",
+            "poBox": "",
+            "extendedAddress": "",
+            "streetAddress": "",
+            "locality": "",
+            "region": "",
+            "postalCode": "",
+            "country": ""
+        }
+    ],
+    "alternateEmail": "",
+    "email": "example@example.com",
+    "enableUserPortalMultifactor": true,
+    "firstname": "Ex",
+    "_id": "61138e94597fd874e1257a9f",
+    "lastname": "Ample",
+    "mfa": {
+        "exclusion": false,
+        "configured": true
+    },
+    "organization": "5916044924df0f7d43adg2ce",
+    "password_expiration_date": "2021-12-08T23:49:34.197Z",
+    "phoneNumbers": [
+        {
+            "_id": "61123e8c1881e021f3bedef3",
+            "type": "mobile",
+            "number": ""
+        },
+        {
+            "_id": "61123e8c1881e021f3bedef4",
+            "type": "home",
+            "number": ""
+        },
+        {
+            "_id": "61123e8c1881e021f3bedef5",
+            "type": "work",
+            "number": ""
+        },
+        {
+            "_id": "61123e8c1881e021f3bedef6",
+            "type": "work_mobile",
+            "number": ""
+        },
+        {
+            "_id": "61123e8c1881e021f3bedef7",
+            "type": "work_fax",
+            "number": ""
+        }
+    ],
+    "restricted_fields": {},
+    "totp_enabled": true,
+    "username": "example"
+}

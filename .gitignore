@@ -1,0 +1,8 @@
+.DS_Store
+.coverage
+.env
+.tox
+.vscode
+*.egg-info
+__pycache__
+dist
