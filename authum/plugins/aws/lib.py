@@ -88,6 +88,8 @@ class AWSSession:
 
     def exec(self, command: tuple, capture_output=False) -> subprocess.CompletedProcess:
         """Runs a shell command with AWS_* environment variables set"""
+        if len(command) == 0:
+            return subprocess.CompletedProcess("", 0)
         return subprocess.run(
             args=command,
             env={**dict(os.environ), **self.env_vars},
