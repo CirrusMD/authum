@@ -8,7 +8,7 @@ import authum.plugin
 import authum.plugins.aws.lib
 
 
-rich_stdout = rich.console.Console()
+rich_stdout = rich.console.Console(soft_wrap=True)
 rich_stderr = rich.console.Console(stderr=True)
 
 
