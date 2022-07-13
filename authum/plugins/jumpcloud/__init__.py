@@ -4,6 +4,7 @@ import click
 import rich.console
 import rich.table
 
+import authum.gui
 import authum.http
 import authum.persistence
 import authum.plugin
@@ -15,29 +16,33 @@ rich_stdout = rich.console.Console()
 rich_stderr = rich.console.Console(stderr=True)
 
 
-def prompt_mfa(factors: list) -> dict:
+def prompt_mfa(factors: list, gui: bool = authum.gui.PROMPT_GUI) -> dict:
     """Prompts for multi-factor authentication"""
     factors = [f for f in factors if f["status"] == "available"]
     if len(factors) == 1:
         return factors[0]
 
-    table = rich.table.Table()
-    table.add_column()
-    table.add_column("Type")
-    for i, f in enumerate(factors):
-        table.add_row(str(i), f["type"])
-    rich_stderr.print(table)
-    choice = click.prompt(
-        "JumpCloud MFA choice", type=click.IntRange(min=0, max=len(factors))
-    )
+    prompt = "JumpCloud MFA choice"
+    if gui:
+        choice = authum.gui.choose(prompt, choices=[f["type"] for f in factors])
+    else:
+        table = rich.table.Table()
+        table.add_column()
+        table.add_column("Type")
+        for i, f in enumerate(factors):
+            table.add_row(str(i), f["type"])
+        rich_stderr.print(table)
+        choice = click.prompt(prompt, type=click.IntRange(min=0, max=len(factors)))
 
     return factors[choice]
 
 
-def prompt_factor_args(factor_type: str) -> dict:
+def prompt_factor_args(factor_type: str, gui: bool = authum.gui.PROMPT_GUI) -> dict:
     """Prompts for multi-factor authentication arguments"""
     if factor_type == "totp":
-        return {"otp": click.prompt("JumpCloud verification code")}
+        prompt = "JumpCloud verification code"
+        otp = authum.gui.prompt(prompt) if gui else click.prompt(prompt)
+        return {"otp": otp}
     elif factor_type == "duo":
         return {}
     else:

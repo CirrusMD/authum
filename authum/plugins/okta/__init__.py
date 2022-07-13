@@ -5,6 +5,7 @@ import rich.console
 import rich.table
 import yaml
 
+import authum.gui
 import authum.http
 import authum.persistence
 import authum.plugin
@@ -16,27 +17,36 @@ rich_stdout = rich.console.Console()
 rich_stderr = rich.console.Console(stderr=True)
 
 
-def prompt_mfa(factors: dict) -> dict:
+def prompt_mfa(factors: dict, gui: bool = authum.gui.PROMPT_GUI) -> dict:
     """Prompts for multi-factor authentication"""
     if len(factors) == 1:
         return factors[0]
 
-    table = rich.table.Table()
-    table.add_column()
-    table.add_column("Type")
-    table.add_column("Provider")
-    table.add_column("Profile")
-    for i, f in enumerate(factors):
-        table.add_row(str(i), f["factorType"], f["provider"], yaml.dump(f["profile"]))
-    rich_stderr.print(table)
-    choice = click.prompt(
-        "Okta MFA choice", type=click.IntRange(min=0, max=len(factors))
-    )
+    prompt = "Okta MFA choice"
+    if gui:
+        choice = authum.gui.choose(
+            prompt,
+            choices=[
+                f"{factor['factorType']} ({factor['provider']})" for factor in factors
+            ],
+        )
+    else:
+        table = rich.table.Table()
+        table.add_column()
+        table.add_column("Type")
+        table.add_column("Provider")
+        table.add_column("Profile")
+        for i, f in enumerate(factors):
+            table.add_row(
+                str(i), f["factorType"], f["provider"], yaml.dump(f["profile"])
+            )
+        rich_stderr.print(table)
+        choice = click.prompt(prompt, type=click.IntRange(min=0, max=len(factors)))
 
     return factors[choice]
 
 
-def prompt_factor_args(factor_type: str) -> dict:
+def prompt_factor_args(factor_type: str, gui: bool = authum.gui.PROMPT_GUI) -> dict:
     """Prompts for multi-factor authentication arguments"""
     if factor_type in (
         "call",
@@ -47,11 +57,15 @@ def prompt_factor_args(factor_type: str) -> dict:
         "token:hotp",
         "token:software:totp",
     ):
-        return {"passCode": click.prompt("Okta passcode")}
+        prompt = "Okta passcode"
+        pass_code = authum.gui.prompt(prompt) if gui else click.prompt(prompt)
+        return {"passCode": pass_code}
     elif factor_type in ["push", "web"]:
         return {}
     elif factor_type == "question":
-        return {"answer": click.prompt("Okta answer")}
+        prompt = "Okta answer"
+        answer = authum.gui.prompt(prompt) if gui else click.prompt(prompt)
+        return {"answer": answer}
     else:
         raise click.ClickException(
             f"Unknown or unimplemented Okta factor type: {factor_type}"
@@ -122,7 +136,7 @@ def extend_cli(click_group):
             if username:
                 okta_data.username = username
             if password:
-                okta_data.password = click.prompt(f"Okta password", hide_input=True)
+                okta_data.password = click.prompt("Okta password", hide_input=True)
             if rm_session:
                 okta_data.session = {}
 
