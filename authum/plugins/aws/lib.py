@@ -127,7 +127,6 @@ class AWSData(authum.persistence.KeyringItem):
         }
 
 
-# FIXME: Needs tests
 def assume_role_with_saml(
     assertion: authum.http.SAMLAssertion, endpoint_url: str = ""
 ) -> AWSSession:
@@ -156,7 +155,6 @@ def assume_role_with_saml(
     return AWSSession(endpoint_url=endpoint_url).from_sts_response(response)
 
 
-# FIXME: Needs tests
 def assume_role_with_session(
     session: AWSSession, role_arn: str, external_id: str = ""
 ) -> AWSSession:

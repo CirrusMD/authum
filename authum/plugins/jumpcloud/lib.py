@@ -113,7 +113,7 @@ class JumpCloudClient(authum.http.HTTPClient):
     def auth_totp(self, otp: str) -> Union[authum.http.RESTResponse, None]:
         """Performs MFA factor verification for the "totp" factor type"""
         response = self.rest_request(
-            url=self.urls["auth_totp"], method="post", data={"otp": otp}
+            url=self.urls["auth_totp"], method="post", data={"otp": str(otp)}
         )
         if not response.response.ok:
             raise JumpCloudError(f"MFA verification failed: {response.get('message')}")
