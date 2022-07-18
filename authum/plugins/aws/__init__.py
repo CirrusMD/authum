@@ -13,24 +13,20 @@ rich_stderr = rich.console.Console(stderr=True)
 
 
 def create_session(
-    alias_or_url: str, role_arn: str = "", external_id: str = "", endpoint_url: str = ""
+    session_name: str,
+    alias_or_url: str,
+    role_arn: str = "",
+    external_id: str = "",
+    endpoint_url: str = "",
 ):
     """Creates an AWS session"""
     try:
-        url = authum.alias.aliases.resolve(alias_or_url)
+        sso_url = authum.alias.aliases.resolve(alias_or_url)
     except authum.alias.AliasError as e:
         raise click.ClickException(str(e))
 
-    assertion = authum.plugin.manager.hook.saml_request(url=url)  # type: ignore
-    if not assertion:
-        raise click.ClickException(
-            f"All plugins declined to handle SAML application URL: {url}"
-        )
-
     try:
-        session = authum.plugins.aws.lib.assume_role_with_saml(
-            assertion, endpoint_url=endpoint_url
-        )
+        session = authum.plugins.aws.lib.assume_role_with_saml(sso_url, endpoint_url)
     except authum.plugins.aws.lib.AWSPluginError as e:
         raise click.ClickException(str(e))
 
@@ -39,24 +35,23 @@ def create_session(
             session=session, role_arn=role_arn, external_id=external_id
         )
 
-    authum.plugins.aws.lib.aws_data.set_session(url, session)
+    authum.plugins.aws.lib.aws_data.set_session(session_name or alias_or_url, session)
 
     return session
 
 
-def get_session(alias_or_url: str, force_rotate: bool = False):
+def get_session(name: str, force_rotate: bool = False):
     """Returns an AWS session"""
-    try:
-        url = authum.alias.aliases.resolve(alias_or_url)
-    except authum.alias.AliasError as e:
-        raise click.ClickException(str(e))
-
     aws_data = authum.plugins.aws.lib.aws_data
-    session = aws_data.session(url)
+    try:
+        session = aws_data.session(name)
+    except authum.plugins.aws.lib.AWSPluginError as e:
+        raise click.ClickException(str(e))
 
     if force_rotate or session.is_expired:
         return create_session(
-            url,
+            name,
+            session.sso_url,
             role_arn=session.role_arn,
             external_id=session.external_id,
             endpoint_url=session.endpoint_url,
@@ -74,12 +69,14 @@ def extend_cli(click_group):
 
     @aws.command()
     @click.pass_context
+    @click.option("-n", "--session-name", help="Session name")
     @click.option("-r", "--role-arn", help="ARN of secondary role to assume")
     @click.option("-i", "--external-id", help="External id for secondary role")
     @click.option("-e", "--endpoint-url", help="Endpoint URL for API calls")
     @click.argument("alias_or_url")
     def add(
         ctx: click.Context,
+        session_name: str,
         role_arn: str,
         external_id: str,
         endpoint_url: str,
@@ -87,6 +84,7 @@ def extend_cli(click_group):
     ):
         """Add an assume-role session"""
         create_session(
+            session_name,
             alias_or_url,
             role_arn=role_arn,
             external_id=external_id,
@@ -96,19 +94,19 @@ def extend_cli(click_group):
 
     @aws.command(context_settings=dict(ignore_unknown_options=True))
     @click.option("-r", "--rotate", is_flag=True, help="Force credential rotation")
-    @click.argument("alias_or_url")
+    @click.argument("session_name")
     @click.argument("command", nargs=-1, type=click.UNPROCESSED)
-    def exec(rotate: bool, alias_or_url: str, command: tuple):
+    def exec(rotate: bool, session_name: str, command: tuple):
         """Run a shell command in the context of an assume-role session"""
-        session = get_session(alias_or_url, force_rotate=rotate)
+        session = get_session(session_name, force_rotate=rotate)
         exit(session.exec(command).returncode)
 
     @aws.command()
     @click.option("-r", "--rotate", is_flag=True, help="Force credential rotation")
-    @click.argument("alias_or_url")
-    def export(rotate: bool, alias_or_url: str):
+    @click.argument("session_name")
+    def export(rotate: bool, session_name: str):
         """Export AWS_* environment variables from an assume-role session"""
-        session = get_session(alias_or_url, force_rotate=rotate)
+        session = get_session(session_name, force_rotate=rotate)
         rich_stdout.print(session.env_vars_export)
 
     @aws.command()
@@ -120,22 +118,20 @@ def extend_cli(click_group):
             return
 
         aliases = authum.alias.aliases
-        sessions = {
-            ", ".join(aliases.aliases_for(alias_or_url)) or alias_or_url: session
-            for alias_or_url, session in aws_data.sessions.items()
-        }
 
         table = rich.table.Table()
-        table.add_column("Name")
+        table.add_column("Session")
+        table.add_column("App")
         table.add_column("Account")
         table.add_column("Assumed Role")
         table.add_column("Endpoint URL")
         table.add_column("TTL")
-        for aliases, session in sorted(sessions.items()):
+        for session_name, session in sorted(aws_data.sessions.items()):
             assumed_role_arn = arn.iam.AssumedRoleArn(session.arn)
             session_color = "red" if session.is_expired else "green"
             table.add_row(
-                aliases,
+                session_name,
+                ", ".join(aliases.aliases_for(session.sso_url)),
                 assumed_role_arn.account,
                 f"{assumed_role_arn.role_name} ({assumed_role_arn.role_session_name})",
                 session.endpoint_url,
@@ -145,17 +141,16 @@ def extend_cli(click_group):
 
     @aws.command()
     @click.pass_context
-    @click.option("--all", "-a", is_flag=True, help="Remove all aliases")
-    @click.argument("alias_or_url", required=False)
-    def rm(ctx: click.Context, all: bool, alias_or_url: str):
+    @click.option("--all", "-a", is_flag=True, help="Remove all sessions")
+    @click.argument("session_name", required=False)
+    def rm(ctx: click.Context, all: bool, session_name: str):
         """Remove assume-role sessions"""
         aws_data = authum.plugins.aws.lib.aws_data
         if all:
             aws_data.delete()
-        elif alias_or_url:
+        elif session_name:
             try:
-                url = authum.alias.aliases.resolve(alias_or_url)
-            except authum.alias.AliasError as e:
-                raise click.ClickException(str(e))
-            aws_data.rm_session(url)
+                aws_data.rm_session(session_name)
+            except KeyError:
+                raise click.ClickException(f"Session not found: {session_name}")
         ctx.invoke(ls)

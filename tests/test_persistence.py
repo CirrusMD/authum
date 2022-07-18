@@ -48,5 +48,7 @@ def test_keyring_item_save(k):
 
 def test_keyring_item_delete(k):
     k.delete()
+    assert k.asdict() == {}
+
     new_k = authum.persistence.KeyringItem(k.keyring_item_name)
     assert new_k.asdict() == {}

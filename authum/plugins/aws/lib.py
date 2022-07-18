@@ -7,7 +7,6 @@ import subprocess
 import arn.iam
 import boto3
 
-import authum.alias
 import authum.http
 import authum.persistence
 import authum.plugin
@@ -20,6 +19,8 @@ log = logging.getLogger()
 @dataclasses.dataclass
 class AWSSession:
     """Represents an AWS Session"""
+
+    sso_url: str = ""
 
     role_arn: str = ""
     external_id: str = ""
@@ -108,29 +109,36 @@ class AWSData(authum.persistence.KeyringItem):
     def __init__(self) -> None:
         super().__init__("aws")
 
-    def set_session(self, url, v: AWSSession) -> None:
-        self.setdefault("session", {})[url] = dataclasses.asdict(v)
+    def set_session(self, name: str, v: AWSSession) -> None:
+        self.setdefault("session", {})[name] = dataclasses.asdict(v)
         self.save()
 
-    def session(self, url) -> AWSSession:
-        return AWSSession(**self.get("session", {}).get(url, {}))
+    def session(self, name: str) -> AWSSession:
+        try:
+            return AWSSession(**self["session"][name])
+        except KeyError:
+            raise AWSPluginError(f"No such session: {name}")
 
-    def rm_session(self, url) -> None:
-        del self.get("session", {})[url]
+    def rm_session(self, name: str) -> None:
+        del self.get("session", {})[name]
         self.save()
 
     @property
     def sessions(self) -> dict:
         return {
-            alias_or_url: AWSSession(**session)
-            for alias_or_url, session in self.get("session", {}).items()
+            name: AWSSession(**session)
+            for name, session in self.get("session", {}).items()
         }
 
 
-def assume_role_with_saml(
-    assertion: authum.http.SAMLAssertion, endpoint_url: str = ""
-) -> AWSSession:
+def assume_role_with_saml(sso_url: str, endpoint_url: str = "") -> AWSSession:
     """Assumes a role via SAML assertion"""
+    assertion = authum.plugin.manager.hook.saml_request(url=sso_url)  # type: ignore
+    if not assertion:
+        raise AWSPluginError(
+            f"All plugins declined to handle SAML application URL: {sso_url}"
+        )
+
     assume_role_args = {"SAMLAssertion": assertion.b64encoded}
 
     try:
@@ -152,7 +160,9 @@ def assume_role_with_saml(
     response = sts.assume_role_with_saml(**assume_role_args)
     log.debug(f"AWS response: {response}")
 
-    return AWSSession(endpoint_url=endpoint_url).from_sts_response(response)
+    return AWSSession(sso_url=sso_url, endpoint_url=endpoint_url).from_sts_response(
+        response
+    )
 
 
 def assume_role_with_session(
@@ -180,7 +190,10 @@ def assume_role_with_session(
     log.debug(f"AWS response: {response}")
 
     return AWSSession(
-        role_arn=role_arn, external_id=external_id, endpoint_url=session.endpoint_url
+        sso_url=session.sso_url,
+        role_arn=role_arn,
+        external_id=external_id,
+        endpoint_url=session.endpoint_url,
     ).from_sts_response(response)
 
 

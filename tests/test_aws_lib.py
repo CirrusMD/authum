@@ -57,4 +57,5 @@ def test_aws_data(random_url, session):
     assert ad.session(random_url) == session
 
     ad.rm_session(random_url)
-    assert ad.session(random_url) == authum.plugins.aws.lib.AWSSession()
+    with pytest.raises(authum.plugins.aws.lib.AWSPluginError):
+        ad.session(random_url)
