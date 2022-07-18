@@ -3,7 +3,7 @@
 ![Authum](assets/authum.jpg) [![Continuous
 integration](https://github.com/CirrusMD/authum/actions/workflows/ci.yml/badge.svg)](https://github.com/CirrusMD/authum/actions/workflows/ci.yml)
 
-Awesome SAML authentication tool for connecting command line applications to
+Awesome authentication tool for connecting command line applications to
 SAML identity and service providers. Authum is the spiritual successor to
 [aws-jumpcloud](https://github.com/CirrusMD/aws-jumpcloud).
 
@@ -63,14 +63,14 @@ SAML identity and service providers. Authum is the spiritual successor to
    administrator should have provided application names that are descriptive
    enough for you to figure out what you need. Alternatively, you can ignore the
    `athm apps` output and simply copy and paste the SSO URL from your identity
-   provider's portal page. In this example, we're adding an alias to our AWS SSO
-   URL so we have a convenient way to refer to it later:
+   provider's portal page. In this example, we're adding an alias for our AWS
+   SSO URL so we have a convenient way to refer to it later:
 
     ```sh
     athm alias add example http://example.com/
     ```
 
-1. Now we're ready to assume roles in AWS. We do this by creating a session with
+1. Now we're ready to assume AWS roles. We do this by creating a session with
    the `aws` plugin, using the alias we created in the previous step. This
    command will use SAML single sign-on to authenticate with AWS and request a
    set of temporary IAM credentials which will be stored in your operating
@@ -80,9 +80,9 @@ SAML identity and service providers. Authum is the spiritual successor to
     athm aws add example
     ```
 
-1. Now you can continue to use the `exec` command, and Authum will automatically
-   rotate credentials for you in the background. You'll only be prompted to
-   authenticate again as needed:
+1. Now you can execute any commmand that requires AWS credentials, and Authum
+   will automatically generate temporary credentials for you in the background.
+   You'll only be prompted to authenticate again as needed:
 
     ```sh
     athm aws exec example <command>
@@ -94,6 +94,12 @@ For help on available commands and options, see the `--help` output:
 
 ```sh
 athm [command] --help
+```
+
+For debugging, use the `--debug` option:
+
+```sh
+athm --debug <command>
 ```
 
 ## Development
