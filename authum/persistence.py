@@ -84,6 +84,7 @@ class KeyringItem(MutableMapping):
         log.debug(f"Deleting keyring item: '{self._service}.{self._name}'")
         try:
             keyring.delete_password(self._service, self._name)
+            self._data = {}
         except keyring.errors.PasswordDeleteError as e:
             if "not found" not in str(e):
                 raise
