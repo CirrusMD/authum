@@ -56,6 +56,9 @@ def test_aws_data(random_url, session):
     ad.set_session(random_url, session)
     assert ad.session(random_url) == session
 
-    ad.rm_session(random_url)
+    new_name = f"{random_url}/renamed"
+    ad.mv_session(random_url, new_name)
+
+    ad.rm_session(new_name)
     with pytest.raises(authum.plugins.aws.lib.AWSPluginError):
-        ad.session(random_url)
+        ad.session(new_name)

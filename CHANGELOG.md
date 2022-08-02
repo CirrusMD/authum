@@ -1,6 +1,8 @@
 # CHANGELOG
 
-## Unreleased
+## 0.4.0 - 2022-08-02
+
+- [aws] Add the ability to rename sessions
 
 ## 0.3.0 - 2022-07-20
 

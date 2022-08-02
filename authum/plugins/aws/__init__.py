@@ -141,6 +141,19 @@ def extend_cli(click_group):
 
     @aws.command()
     @click.pass_context
+    @click.argument("current_name")
+    @click.argument("new_name")
+    def mv(ctx: click.Context, current_name: str, new_name: str):
+        """Rename an assume-role session"""
+        aws_data = authum.plugins.aws.lib.aws_data
+        try:
+            aws_data.mv_session(current_name, new_name)
+        except authum.plugins.aws.lib.AWSPluginError as e:
+            raise click.ClickException(str(e))
+        ctx.invoke(ls)
+
+    @aws.command()
+    @click.pass_context
     @click.option("--all", "-a", is_flag=True, help="Remove all sessions")
     @click.argument("session_name", required=False)
     def rm(ctx: click.Context, all: bool, session_name: str):
@@ -151,6 +164,6 @@ def extend_cli(click_group):
         elif session_name:
             try:
                 aws_data.rm_session(session_name)
-            except KeyError:
-                raise click.ClickException(f"Session not found: {session_name}")
+            except authum.plugins.aws.lib.AWSPluginError as e:
+                raise click.ClickException(str(e))
         ctx.invoke(ls)
