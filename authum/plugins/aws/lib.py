@@ -110,21 +110,33 @@ class AWSData(authum.persistence.KeyringItem):
         super().__init__("aws")
 
     def set_session(self, name: str, v: AWSSession) -> None:
+        """Save a session"""
         self.setdefault("session", {})[name] = dataclasses.asdict(v)
         self.save()
 
     def session(self, name: str) -> AWSSession:
+        """Return a session by name"""
         try:
             return AWSSession(**self["session"][name])
         except KeyError:
             raise AWSPluginError(f"No such session: {name}")
 
+    def mv_session(self, current_name: str, new_name: str) -> None:
+        """Rename a session"""
+        self.set_session(new_name, self.session(current_name))
+        self.rm_session(current_name)
+
     def rm_session(self, name: str) -> None:
-        del self.get("session", {})[name]
+        """Delete a session by name"""
+        try:
+            del self.get("session", {})[name]
+        except KeyError:
+            raise AWSPluginError(f"No such session: {name}")
         self.save()
 
     @property
     def sessions(self) -> dict:
+        """Return all sessions as a dict"""
         return {
             name: AWSSession(**session)
             for name, session in self.get("session", {}).items()
