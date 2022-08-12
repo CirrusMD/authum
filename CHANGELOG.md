@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.4.1 - 2022-08-12
+
+- Bump constraint on python to >=3.8,<3.12 (this constraint is required by pex)
+- Update dependencies
+
 ## 0.4.0 - 2022-08-02
 
 - [aws] Add the ability to rename sessions
