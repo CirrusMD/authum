@@ -160,4 +160,7 @@ def saml_request(url):
     okta_data = authum.plugins.okta.lib.okta_data
     if authum.util.url_has_domain(url, okta_data.domain):
         client = get_okta_client()
+        if not client:
+            raise click.ClickException("Okta plugin is not configured")
+
         return client.saml_request(url=url)

@@ -130,4 +130,7 @@ def saml_request(url):
         url, authum.plugins.jumpcloud.lib.JUMPCLOUD_SSO_DOMAIN
     ):
         client = get_jumpcloud_client()
+        if not client:
+            raise click.ClickException("JumpCloud plugin is not configured")
+
         return client.saml_request(url=url)
