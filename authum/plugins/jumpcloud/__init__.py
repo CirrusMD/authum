@@ -51,11 +51,14 @@ def prompt_factor_args(factor_type: str, gui: bool = authum.gui.PROMPT_GUI) -> d
         )
 
 
-def get_jumpcloud_client() -> Type:
+def get_jumpcloud_client(fail_unconfigured: bool = True) -> Type:
     """Returns a JumpCloud client"""
     jumpcloud_data = authum.plugins.jumpcloud.lib.jumpcloud_data
     if not jumpcloud_data.email or not jumpcloud_data.password:
-        return
+        if fail_unconfigured:
+            raise click.ClickException("JumpCloud plugin is not configured")
+        else:
+            return
 
     client = authum.plugins.jumpcloud.lib.JumpCloudClient(
         email=jumpcloud_data.email,
@@ -114,7 +117,7 @@ def extend_cli(click_group):
 
 @authum.plugin.hookimpl
 def get_apps():
-    client = get_jumpcloud_client()
+    client = get_jumpcloud_client(fail_unconfigured=False)
     if not client:
         return []
 
@@ -130,4 +133,7 @@ def saml_request(url):
         url, authum.plugins.jumpcloud.lib.JUMPCLOUD_SSO_DOMAIN
     ):
         client = get_jumpcloud_client()
-        return client.saml_request(url=url)
+        try:
+            return client.saml_request(url=url)
+        except authum.plugins.jumpcloud.lib.JumpCloudError as e:
+            raise click.ClickException(str(e))
