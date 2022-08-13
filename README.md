@@ -29,6 +29,17 @@ SAML identity and service providers. Authum is the spiritual successor to
 1. `make install`
 1. `rehash` to update binaries in `$PATH`
 
+## Graphical Prompts
+
+[tkinter](https://docs.python.org/3/library/tkinter.html) is required for
+graphical prompts.
+
+### Homebrew on macOS
+
+```sh
+brew install python-tk
+```
+
 ## Example Usage: Assume AWS IAM Roles via Identity Provider Credentials
 
 1. If you had been storing persistent AWS credentials under `~/.aws`, here are
