@@ -1,7 +1,9 @@
 import arn.iam
 import click
+import os
 import rich.console
 import rich.table
+import sys
 
 import authum.alias
 import authum.plugin
@@ -99,7 +101,15 @@ def extend_cli(click_group):
     def exec(rotate: bool, session_name: str, command: tuple):
         """Run a shell command in the context of an assume-role session"""
         session = get_session(session_name, force_rotate=rotate)
-        exit(session.exec(command).returncode)
+        executable = os.path.basename(sys.argv[0])
+        try:
+            exit(session.exec(command).returncode)
+        except PermissionError:
+            rich_stderr.print(f"{executable}: permission denied: {command[0]}")
+            exit(126)
+        except FileNotFoundError:
+            rich_stderr.print(f"{executable}: command not found: {command[0]}")
+            exit(127)
 
     @aws.command()
     @click.option("-r", "--rotate", is_flag=True, help="Force credential rotation")
