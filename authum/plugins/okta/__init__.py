@@ -72,11 +72,14 @@ def prompt_factor_args(factor_type: str, gui: bool = authum.gui.PROMPT_GUI) -> d
         )
 
 
-def get_okta_client() -> Type:
+def get_okta_client(fail_unconfigured: bool = True) -> Type:
     """Returns an Okta client"""
     okta_data = authum.plugins.okta.lib.okta_data
     if not okta_data.domain or not okta_data.username or not okta_data.password:
-        return
+        if fail_unconfigured:
+            raise click.ClickException("Okta plugin is not configured")
+        else:
+            return
 
     client = authum.plugins.okta.lib.OktaClient(
         domain=okta_data.domain,
@@ -145,7 +148,7 @@ def extend_cli(click_group):
 
 @authum.plugin.hookimpl
 def get_apps():
-    client = get_okta_client()
+    client = get_okta_client(fail_unconfigured=False)
     if not client:
         return []
 
@@ -160,4 +163,7 @@ def saml_request(url):
     okta_data = authum.plugins.okta.lib.okta_data
     if authum.util.url_has_domain(url, okta_data.domain):
         client = get_okta_client()
-        return client.saml_request(url=url)
+        try:
+            return client.saml_request(url=url)
+        except authum.plugins.okta.lib.OktaError as e:
+            raise click.ClickException(str(e))

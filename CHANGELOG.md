@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.4.1 - 2022-08-12
+
+- Bump constraint on python to >=3.8,<3.12 (upper constraint is required by pex)
+- Update dependencies
+- [aws] Improve `exec` error messages
+- [jumpcloud,okta] Verify SSO URLs before making SAML requests
+- [jumpcloud,okta] Verify that plugin is configured before making SAML requests
+
 ## 0.4.0 - 2022-08-02
 
 - [aws] Add the ability to rename sessions

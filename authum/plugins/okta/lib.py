@@ -73,6 +73,9 @@ class OktaClient(authum.http.HTTPClient):
 
     def saml_request(self, url: str) -> authum.http.SAMLAssertion:
         """Performs a SAML request and returns the response"""
+        if url not in [app["linkUrl"] for app in list(self.app_links())]:
+            raise OktaError(f"Unknown SSO URL: {url}")
+
         return super().saml_request(
             url=url,
             # https://developer.okta.com/docs/guides/session-cookie/overview/
