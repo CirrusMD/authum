@@ -6,6 +6,7 @@ import rich.console
 import rich.logging
 import rich.table
 
+import authum
 import authum.alias
 import authum.plugin
 
@@ -27,7 +28,8 @@ plugin_list = "\n".join(
     help="Enable debug mode (WARNING: logs may include sensitive data)",
 )
 @click.version_option(
-    prog_name="athm", message=f"%(prog)s %(version)s\n\nPlugins:\n{plugin_list}"
+    prog_name=authum.metadata["Name"],
+    message=f"%(prog)s %(version)s\n\nPlugins:\n{plugin_list}",
 )
 def main(debug: bool) -> None:
     handler_opts = {

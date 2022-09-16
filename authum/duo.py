@@ -10,6 +10,7 @@ import webbrowser
 import flask
 import flask.cli
 
+import authum
 import authum.http
 
 
@@ -48,6 +49,7 @@ class DuoWebV2:
         @self._app.route("/")
         def index():
             template_vars = {
+                "app_name": authum.metadata["Name"].capitalize(),
                 "name": name,
                 "host": host,
                 "sig_request": sig_request,
