@@ -111,8 +111,8 @@ class SAMLAssertionAttributes(Mapping):
 
 
 @dataclasses.dataclass
-class SAMLApplication:
-    """Represents a SAML application"""
+class SSOApplication:
+    """Represents an SSO application"""
 
     name: str
     url: str
@@ -178,6 +178,9 @@ class HTTPClient:
         }
 
         response = self._client.request(**kwargs)
+        log.debug(
+            f"SAML response ({response.status_code}): {response.content.decode()}"
+        )
 
         parser = bs4.BeautifulSoup(response.content, "html.parser")
         try:
@@ -189,9 +192,6 @@ class HTTPClient:
                 )
             )
         except StopIteration:
-            raise Exception("SAML response not found")
+            raise Exception("SAML assertion not found")
 
-        response_saml = SAMLAssertion(response_saml)
-        log.debug(f"SAML response ({response.status_code}): {response_saml.xml}")
-
-        return response_saml
+        return SAMLAssertion(response_saml)

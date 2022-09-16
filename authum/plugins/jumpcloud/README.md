@@ -1,7 +1,7 @@
 # JumpCloud Plugin
 
-This plugin handles authentication with [JumpCloud](https://jumpcloud.com/).
-See: `athm jumpcloud --help`.
+This plugin handles authentication with [JumpCloud](https://jumpcloud.com/) for
+SAML applications. See: `athm jumpcloud --help`.
 
 ## Features
 

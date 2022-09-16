@@ -85,7 +85,6 @@ class JumpCloudClient(authum.http.HTTPClient):
             if response.response.ok and "/login" not in response.response.headers.get(
                 "Location", ""
             ):
-                log.debug(f"Reusing existing session")
                 return response
 
         self.xsrf()
@@ -201,6 +200,3 @@ class JumpCloudData(authum.persistence.KeyringItem):
         elif "session" in self:
             del self["session"]
         self.save()
-
-
-jumpcloud_data = JumpCloudData()

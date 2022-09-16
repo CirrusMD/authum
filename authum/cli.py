@@ -46,8 +46,8 @@ def main(debug: bool) -> None:
 
 @main.command()
 def apps() -> None:
-    """List apps"""
-    apps = functools.reduce(list.__add__, authum.plugin.manager.hook.get_apps())  # type: ignore
+    """List apps from all configured identity providers"""
+    apps = functools.reduce(list.__add__, authum.plugin.manager.hook.list_apps())  # type: ignore
     if not apps:
         authum.util.rich_stderr.print(
             "No apps found. Do you have at least one identity provider configured?"

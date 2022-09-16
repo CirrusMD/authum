@@ -1,61 +1,11 @@
-import arn.iam
 import click
 import os
 import rich.table
 import sys
 
-import authum.alias
 import authum.plugin
 import authum.plugins.aws.lib
 import authum.util
-
-
-def create_session(
-    session_name: str,
-    alias_or_url: str,
-    role_arn: str = "",
-    external_id: str = "",
-    endpoint_url: str = "",
-):
-    """Creates an AWS session"""
-    try:
-        sso_url = authum.alias.aliases.resolve(alias_or_url)
-    except authum.alias.AliasError as e:
-        raise click.ClickException(str(e))
-
-    try:
-        session = authum.plugins.aws.lib.assume_role_with_saml(sso_url, endpoint_url)
-    except authum.plugins.aws.lib.AWSPluginError as e:
-        raise click.ClickException(str(e))
-
-    if role_arn or external_id:
-        session = authum.plugins.aws.lib.assume_role_with_session(
-            session=session, role_arn=role_arn, external_id=external_id
-        )
-
-    authum.plugins.aws.lib.aws_data.set_session(session_name or alias_or_url, session)
-
-    return session
-
-
-def get_session(name: str, force_rotate: bool = False):
-    """Returns an AWS session"""
-    aws_data = authum.plugins.aws.lib.aws_data
-    try:
-        session = aws_data.session(name)
-    except authum.plugins.aws.lib.AWSPluginError as e:
-        raise click.ClickException(str(e))
-
-    if force_rotate or session.is_expired:
-        return create_session(
-            name,
-            session.sso_url,
-            role_arn=session.role_arn,
-            external_id=session.external_id,
-            endpoint_url=session.endpoint_url,
-        )
-
-    return session
 
 
 @authum.plugin.hookimpl
@@ -67,39 +17,79 @@ def extend_cli(click_group):
 
     @aws.command()
     @click.pass_context
-    @click.option("-n", "--session-name", help="Session name")
-    @click.option("-r", "--role-arn", help="ARN of secondary role to assume")
-    @click.option("-i", "--external-id", help="External id for secondary role")
-    @click.option("-e", "--endpoint-url", help="Endpoint URL for API calls")
-    @click.argument("alias_or_url")
-    def add(
+    @click.option(
+        "-u",
+        "--start-url",
+        required=True,
+        help="AWS Identity Center start URL (or subdomain)",
+    )
+    @click.option("-a", "--account-id", required=True, help="AWS account ID")
+    @click.option("-r", "--role-name", required=True, help="AWS role name")
+    @click.option("--assume-role-arn", help="ARN of role to assume")
+    @click.option("--assume-role-external-id", help="External id for role to assume")
+    @click.option("--sts-endpoint", help="Endpoint URL for STS API calls")
+    @click.argument("name")
+    def add_sso(
         ctx: click.Context,
-        session_name: str,
-        role_arn: str,
-        external_id: str,
-        endpoint_url: str,
-        alias_or_url: str,
+        name: str,
+        start_url: str,
+        account_id: str,
+        role_name: str,
+        assume_role_arn: str,
+        assume_role_external_id: str,
+        sts_endpoint: str,
     ):
-        """Add an assume-role session"""
-        create_session(
-            session_name,
-            alias_or_url,
-            role_arn=role_arn,
-            external_id=external_id,
-            endpoint_url=endpoint_url,
+        """Add SSO credentials"""
+        role = authum.plugins.aws.lib.AWSSSORoleCredentials(
+            name=name,
+            start_url=authum.plugins.aws.lib.normalize_start_url(start_url),
+            account_id=account_id,
+            role_name=role_name,
+            assume_role_arn=assume_role_arn,
+            assume_role_external_id=assume_role_external_id,
+            sts_endpoint=sts_endpoint,
         )
+        role.renew(force=True)
+        ctx.invoke(ls)
+
+    @aws.command()
+    @click.pass_context
+    @click.option("-u", "--saml-url", required=True, help="SAML application URL")
+    @click.option("--assume-role-arn", help="ARN of role to assume")
+    @click.option("--assume-role-external-id", help="External id for role to assume")
+    @click.option("--sts-endpoint", help="Endpoint URL for STS API calls")
+    @click.argument("name")
+    def add_saml(
+        ctx: click.Context,
+        name: str,
+        saml_url: str,
+        assume_role_arn: str,
+        assume_role_external_id: str,
+        sts_endpoint: str,
+    ):
+        """Add SAML credentials"""
+        role = authum.plugins.aws.lib.AWSSAMLRoleCredentials(
+            name=name,
+            saml_url=saml_url,
+            assume_role_arn=assume_role_arn,
+            assume_role_external_id=assume_role_external_id,
+            sts_endpoint=sts_endpoint,
+        )
+        role.renew(force=True)
         ctx.invoke(ls)
 
     @aws.command(context_settings=dict(ignore_unknown_options=True))
     @click.option("-r", "--rotate", is_flag=True, help="Force credential rotation")
-    @click.argument("session_name")
+    @click.argument("name")
     @click.argument("command", nargs=-1, type=click.UNPROCESSED)
-    def exec(rotate: bool, session_name: str, command: tuple):
-        """Run a shell command in the context of an assume-role session"""
-        session = get_session(session_name, force_rotate=rotate)
+    def exec(rotate: bool, name: str, command: tuple):
+        """Run a shell command with the selected credentials"""
+        aws_data = authum.plugins.aws.lib.AWSData()
+        credentials = aws_data.credentials(name)
+        credentials.renew(force=rotate)
         executable = os.path.basename(sys.argv[0])
         try:
-            exit(session.exec(command).returncode)
+            exit(credentials.exec(command).returncode)
         except PermissionError:
             authum.util.rich_stderr.print(
                 f"{executable}: permission denied: {command[0]}"
@@ -113,67 +103,96 @@ def extend_cli(click_group):
 
     @aws.command()
     @click.option("-r", "--rotate", is_flag=True, help="Force credential rotation")
-    @click.argument("session_name")
-    def export(rotate: bool, session_name: str):
-        """Export AWS_* environment variables from an assume-role session"""
-        session = get_session(session_name, force_rotate=rotate)
-        authum.util.rich_stdout.print(session.env_vars_export)
+    @click.argument("name")
+    def export(rotate: bool, name: str):
+        """Export AWS_* environment variables for the selected credentials"""
+        aws_data = authum.plugins.aws.lib.AWSData()
+        credentials = aws_data.credentials(name)
+        credentials.renew(force=rotate)
+        authum.util.rich_stdout.print(credentials.env_vars_export)
 
     @aws.command()
     def ls():
-        """List assume-role sessions"""
-        aws_data = authum.plugins.aws.lib.aws_data
-        if not aws_data.sessions:
-            authum.util.rich_stderr.print("No sessions")
+        """List credentials"""
+        aws_data = authum.plugins.aws.lib.AWSData()
+        if not aws_data.list_credentials:
+            authum.util.rich_stderr.print("No credentials")
             return
 
-        aliases = authum.alias.aliases
+        for name, credentials in sorted(aws_data.list_credentials.items()):
+            table = rich.table.Table(title=name, **authum.util.rich_table_vertical_opts)
 
-        table = rich.table.Table()
-        table.add_column("Session")
-        table.add_column("App")
-        table.add_column("Account")
-        table.add_column("Assumed Role")
-        table.add_column("Endpoint URL")
-        table.add_column("TTL")
-        for session_name, session in sorted(aws_data.sessions.items()):
-            assumed_role_arn = arn.iam.AssumedRoleArn(session.arn)
-            session_color = "red" if session.is_expired else "green"
-            table.add_row(
-                session_name,
-                ", ".join(aliases.aliases_for(session.sso_url)),
-                assumed_role_arn.account,
-                f"{assumed_role_arn.role_name} ({assumed_role_arn.role_session_name})",
-                session.endpoint_url,
-                f"[{session_color}]{session.pretty_ttl}[/{session_color}]",
+            if hasattr(credentials, "start_url"):
+                table.add_row("Type", "SSO")
+                table.add_row("Start URL", credentials.start_url)
+                table.add_row("Account ID", credentials.account_id)
+                table.add_row("Role Name", credentials.role_name)
+
+            elif hasattr(credentials, "saml_url"):
+                table.add_row("Type", "SAML")
+                table.add_row("SAML URL", credentials.saml_url)
+
+            if credentials.assume_role_arn:
+                table.add_row("Assume-role ARN", credentials.assume_role_arn)
+
+            if credentials.assume_role_external_id:
+                table.add_row(
+                    "Assume-role External ID",
+                    authum.util.sensitive_value(credentials.assume_role_external_id),
+                )
+
+            if credentials.sts_endpoint:
+                table.add_row("STS Endpoint", credentials.sts_endpoint)
+
+            color = "red" if credentials.is_expired else "green"
+            table.add_row("TTL", f"[{color}]{credentials.ttl_str}[/{color}]")
+
+            authum.util.rich_stderr.print(table)
+
+    @aws.command()
+    @click.pass_context
+    @click.argument("start_url_or_subdomain")
+    def ls_sso_roles(ctx: click.Context, start_url_or_subdomain: str):
+        """List available SSO roles"""
+        client = authum.plugins.aws.lib.AWSSSOClient(
+            start_url=authum.plugins.aws.lib.normalize_start_url(start_url_or_subdomain)
+        )
+        for account in sorted(
+            client.list_accounts(), key=lambda a: (a["accountName"], a["accountId"])
+        ):
+            table = rich.table.Table(
+                title=account["accountName"], **authum.util.rich_table_vertical_opts
             )
-        authum.util.rich_stderr.print(table)
+            table.add_row("Account Id", account["accountId"])
+            table.add_row("Email", account["emailAddress"])
+            table.add_row("Roles", ", ".join(account["roles"]))
+            authum.util.rich_stderr.print(table)
 
     @aws.command()
     @click.pass_context
     @click.argument("current_name")
     @click.argument("new_name")
     def mv(ctx: click.Context, current_name: str, new_name: str):
-        """Rename an assume-role session"""
-        aws_data = authum.plugins.aws.lib.aws_data
+        """Rename credentials"""
+        aws_data = authum.plugins.aws.lib.AWSData()
         try:
-            aws_data.mv_session(current_name, new_name)
-        except authum.plugins.aws.lib.AWSPluginError as e:
-            raise click.ClickException(str(e))
+            aws_data.mv_credentials(current_name, new_name)
+        except KeyError:
+            raise click.ClickException(f"No such credentials: {current_name}")
         ctx.invoke(ls)
 
     @aws.command()
     @click.pass_context
-    @click.option("--all", "-a", is_flag=True, help="Remove all sessions")
-    @click.argument("session_name", required=False)
-    def rm(ctx: click.Context, all: bool, session_name: str):
-        """Remove assume-role sessions"""
-        aws_data = authum.plugins.aws.lib.aws_data
+    @click.option("--all", "-a", is_flag=True, help="Remove all credentials")
+    @click.argument("name", required=False)
+    def rm(ctx: click.Context, all: bool, name: str):
+        """Remove credentials"""
+        aws_data = authum.plugins.aws.lib.AWSData()
         if all:
             aws_data.delete()
-        elif session_name:
+        elif name:
             try:
-                aws_data.rm_session(session_name)
-            except authum.plugins.aws.lib.AWSPluginError as e:
-                raise click.ClickException(str(e))
+                aws_data.rm_credentials(name)
+            except KeyError:
+                raise click.ClickException(f"No such credentials: {name}")
         ctx.invoke(ls)

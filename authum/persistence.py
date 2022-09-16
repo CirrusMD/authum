@@ -5,7 +5,6 @@ from typing import Any, Iterable
 
 import keyring
 import keyring.errors
-import yaml
 
 
 log = logging.getLogger(__name__)
@@ -42,17 +41,6 @@ class KeyringItem(MutableMapping):
 
     def __len__(self) -> int:
         return len(self._data)
-
-    def asyaml(self, masked_keys=[], hidden_keys=[]) -> str:
-        """Return a naive (non-recursive) YAML representation of the item"""
-        y = {}
-        for k, v in self.items():
-            if k in masked_keys:
-                y[k] = "<masked>"
-            elif k not in hidden_keys:
-                y[k] = v
-
-        return yaml.dump(y)
 
     def asdict(self) -> dict:
         """Return the item as a dict"""

@@ -1,7 +1,7 @@
 # Okta Plugin
 
-This plugin handles authentication with [Okta](https://www.okta.com/). See:
-`athm okta --help`.
+This plugin handles authentication with [Okta](https://www.okta.com/) for SAML
+applications. See: `athm okta --help`.
 
 ## Features
 

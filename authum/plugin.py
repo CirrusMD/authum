@@ -31,12 +31,11 @@ def extend_cli(click_group):
 
 
 @hookspec
-def get_apps():
-    """Authenticates with a SAML identity provider and returns a list of SAML
-    applications.
+def list_apps():
+    """Returns a list of applications from an identity provider.
 
     Returns:
-        Iterable[authum.http.SAMLApplication]: An Iterable of SAML applications
+        Iterable[authum.http.SSOApplication]: An Iterable of SSO applications
     """
     pass
 
