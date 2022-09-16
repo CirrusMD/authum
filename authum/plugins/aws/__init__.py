@@ -1,17 +1,13 @@
 import arn.iam
 import click
 import os
-import rich.console
 import rich.table
 import sys
 
 import authum.alias
 import authum.plugin
 import authum.plugins.aws.lib
-
-
-rich_stdout = rich.console.Console(soft_wrap=True)
-rich_stderr = rich.console.Console(stderr=True)
+import authum.util
 
 
 def create_session(
@@ -105,10 +101,14 @@ def extend_cli(click_group):
         try:
             exit(session.exec(command).returncode)
         except PermissionError:
-            rich_stderr.print(f"{executable}: permission denied: {command[0]}")
+            authum.util.rich_stderr.print(
+                f"{executable}: permission denied: {command[0]}"
+            )
             exit(126)
         except FileNotFoundError:
-            rich_stderr.print(f"{executable}: command not found: {command[0]}")
+            authum.util.rich_stderr.print(
+                f"{executable}: command not found: {command[0]}"
+            )
             exit(127)
 
     @aws.command()
@@ -117,14 +117,14 @@ def extend_cli(click_group):
     def export(rotate: bool, session_name: str):
         """Export AWS_* environment variables from an assume-role session"""
         session = get_session(session_name, force_rotate=rotate)
-        rich_stdout.print(session.env_vars_export)
+        authum.util.rich_stdout.print(session.env_vars_export)
 
     @aws.command()
     def ls():
         """List assume-role sessions"""
         aws_data = authum.plugins.aws.lib.aws_data
         if not aws_data.sessions:
-            rich_stderr.print("No sessions")
+            authum.util.rich_stderr.print("No sessions")
             return
 
         aliases = authum.alias.aliases
@@ -147,7 +147,7 @@ def extend_cli(click_group):
                 session.endpoint_url,
                 f"[{session_color}]{session.pretty_ttl}[/{session_color}]",
             )
-        rich_stderr.print(table)
+        authum.util.rich_stderr.print(table)
 
     @aws.command()
     @click.pass_context

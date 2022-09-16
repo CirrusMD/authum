@@ -2,17 +2,13 @@ import functools
 import logging
 
 import click
-import rich.console
 import rich.logging
 import rich.table
 
 import authum
 import authum.alias
 import authum.plugin
-
-
-rich_stdout = rich.console.Console()
-rich_stderr = rich.console.Console(stderr=True)
+import authum.util
 
 authum.plugin.load_plugins()
 plugin_list = "\n".join(
@@ -33,7 +29,7 @@ plugin_list = "\n".join(
 )
 def main(debug: bool) -> None:
     handler_opts = {
-        "console": rich.console.Console(stderr=True),
+        "console": authum.util.rich_stderr,
         "show_level": False,
         "show_path": False,
         "show_time": False,
@@ -53,7 +49,7 @@ def apps() -> None:
     """List apps"""
     apps = functools.reduce(list.__add__, authum.plugin.manager.hook.get_apps())  # type: ignore
     if not apps:
-        rich_stderr.print(
+        authum.util.rich_stderr.print(
             "No apps found. Do you have at least one identity provider configured?"
         )
         return
@@ -67,7 +63,7 @@ def apps() -> None:
     for a in sorted(apps):
         aliases_for = ", ".join(aliases.aliases_for(a.url))
         table.add_row(a.name, a.url, aliases_for)
-    rich_stderr.print(table)
+    authum.util.rich_stderr.print(table)
 
 
 @main.group()
@@ -92,7 +88,7 @@ def ls():
     """List aliases"""
     aliases = authum.alias.aliases
     if not aliases:
-        rich_stderr.print("No aliases")
+        authum.util.rich_stderr.print("No aliases")
         return
 
     table = rich.table.Table()
@@ -100,7 +96,7 @@ def ls():
     table.add_column("URL")
     for name, url in sorted(aliases.items()):
         table.add_row(name, url)
-    rich_stderr.print(table)
+    authum.util.rich_stderr.print(table)
 
 
 @alias.command()

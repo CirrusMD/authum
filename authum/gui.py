@@ -2,8 +2,6 @@ import signal
 import sys
 from typing import Type, Union
 
-import rich
-
 import authum
 import authum.util
 
@@ -60,6 +58,6 @@ try:
 
 except ModuleNotFoundError as e:
     if not HAS_TTY:
-        rich_stderr.print(f"Warning: {e} (GUI prompts disabled)")
+        authum.util.rich_stderr.print(f"Warning: {e} (GUI prompts disabled)")
 
 PROMPT_GUI = not HAS_TTY and HAS_TKINTER

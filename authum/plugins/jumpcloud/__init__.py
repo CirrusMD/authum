@@ -1,7 +1,6 @@
 from typing import Type
 
 import click
-import rich.console
 import rich.table
 
 import authum.gui
@@ -10,10 +9,6 @@ import authum.persistence
 import authum.plugin
 import authum.plugins.jumpcloud.lib
 import authum.util
-
-
-rich_stdout = rich.console.Console()
-rich_stderr = rich.console.Console(stderr=True)
 
 
 def prompt_mfa(factors: list, gui: bool = authum.gui.PROMPT_GUI) -> dict:
@@ -31,7 +26,7 @@ def prompt_mfa(factors: list, gui: bool = authum.gui.PROMPT_GUI) -> dict:
         table.add_column("Type")
         for i, f in enumerate(factors):
             table.add_row(str(i), f["type"])
-        rich_stderr.print(table)
+        authum.util.rich_stderr.print(table)
         choice = click.prompt(prompt, type=click.IntRange(min=0, max=len(factors)))
 
     return factors[choice]
@@ -75,7 +70,7 @@ def get_jumpcloud_client(fail_unconfigured: bool = True) -> Type:
     except authum.plugins.jumpcloud.lib.JumpCloudMFARequired as e:
         factor = prompt_mfa(e.response["factors"])
         factor_args = prompt_factor_args(factor["type"])
-        with rich_stderr.status("Waiting for MFA verification..."):
+        with authum.util.rich_stderr.status("Waiting for MFA verification..."):
             getattr(e.client, f"auth_{factor['type']}")(**factor_args)
 
     jumpcloud_data.session = client.session
@@ -112,7 +107,9 @@ def extend_cli(click_group):
             if rm_session:
                 jumpcloud_data.session = {}
 
-        rich_stderr.print(jumpcloud_data.asyaml(masked_keys=["password", "session"]))
+        authum.util.rich_stderr.print(
+            jumpcloud_data.asyaml(masked_keys=["password", "session"])
+        )
 
 
 @authum.plugin.hookimpl
