@@ -57,11 +57,3 @@ def test_aliases_rm_ok(a):
     a.rm("foo")
     assert a.asdict() == {}
     a.delete()
-
-
-@pytest.mark.parametrize(
-    "url, result",
-    [["127.0.0.1", False], ["http://", False], ["http://127.0.0.1", True]],
-)
-def test_is_url(url, result):
-    assert authum.alias.is_url(url) == result

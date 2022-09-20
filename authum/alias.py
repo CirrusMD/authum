@@ -1,6 +1,7 @@
 import urllib.parse
 
 import authum.persistence
+import authum.util
 
 
 class Aliases(authum.persistence.KeyringItem):
@@ -11,7 +12,7 @@ class Aliases(authum.persistence.KeyringItem):
 
     def add(self, name: str, url: str) -> None:
         """Add an alias"""
-        if not is_url(url):
+        if not authum.util.is_url(url):
             raise AliasError(f"Invalid URL: {url}")
 
         self[name] = url
@@ -19,7 +20,7 @@ class Aliases(authum.persistence.KeyringItem):
 
     def resolve(self, name_or_url: str) -> str:
         """Resolve an alias to a URL"""
-        if is_url(name_or_url):
+        if authum.util.is_url(name_or_url):
             return name_or_url
 
         try:
@@ -54,12 +55,6 @@ class AliasError(KeyError):
     """Represents general alias errors"""
 
     pass
-
-
-def is_url(url: str) -> bool:
-    """Checks whether the string is a URL"""
-    o = urllib.parse.urlparse(url)
-    return all([o.scheme, o.netloc])
 
 
 aliases = Aliases()
