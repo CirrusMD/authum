@@ -6,9 +6,9 @@ import rich.logging
 import rich.table
 
 import authum
-import authum.alias
 import authum.plugin
 import authum.util
+
 
 authum.plugin.load_plugins()
 plugin_list = "\n".join(
@@ -54,80 +54,12 @@ def apps() -> None:
         )
         return
 
-    aliases = authum.alias.aliases
-
-    table = rich.table.Table()
+    table = rich.table.Table(**authum.util.rich_table_horizontal_opts)
     table.add_column("Name")
     table.add_column("URL")
-    table.add_column("Alias")
     for a in sorted(apps):
-        aliases_for = ", ".join(aliases.aliases_for(a.url))
-        table.add_row(a.name, a.url, aliases_for)
+        table.add_row(a.name, a.url)
     authum.util.rich_stderr.print(table)
-
-
-@main.group()
-def alias() -> None:
-    """Manage URL aliases"""
-    pass
-
-
-@alias.command()
-@click.pass_context
-@click.argument("name")
-@click.argument("url")
-def add(ctx: click.Context, name: str, url: str) -> None:
-    """Add an alias"""
-    aliases = authum.alias.aliases
-    aliases.add(name, url)
-    ctx.invoke(ls)
-
-
-@alias.command()
-def ls():
-    """List aliases"""
-    aliases = authum.alias.aliases
-    if not aliases:
-        authum.util.rich_stderr.print("No aliases")
-        return
-
-    table = rich.table.Table()
-    table.add_column("Name")
-    table.add_column("URL")
-    for name, url in sorted(aliases.items()):
-        table.add_row(name, url)
-    authum.util.rich_stderr.print(table)
-
-
-@alias.command()
-@click.pass_context
-@click.argument("cur")
-@click.argument("new")
-def mv(ctx: click.Context, cur: str, new: str) -> None:
-    """Rename an alias"""
-    aliases = authum.alias.aliases
-    try:
-        aliases.mv(cur, new)
-        ctx.invoke(ls)
-    except authum.alias.AliasError as e:
-        raise click.ClickException(str(e))
-
-
-@alias.command()
-@click.pass_context
-@click.option("--all", "-a", is_flag=True, help="Remove all aliases")
-@click.argument("name", required=False)
-def rm(ctx: click.Context, all: bool, name: str) -> None:
-    """Remove aliases"""
-    aliases = authum.alias.aliases
-    if all:
-        aliases.delete()
-    elif name:
-        try:
-            aliases.rm(name)
-        except authum.alias.AliasError as e:
-            raise click.ClickException(str(e))
-    ctx.invoke(ls)
 
 
 authum.plugin.manager.hook.extend_cli(click_group=main)  # type: ignore
