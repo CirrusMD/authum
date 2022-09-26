@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 1.0.0 - 2022-09-27
+
+- Aliases and associated commands have been removed, so it's OK to delete the
+  authum alias item from your keychain (e.g. `keyring del authum alias`)
+- [aws] AWS IAM Identity Center (SSO) is now supported. Note that the internal
+  representation of credentials has changed, so you should re-add all your
+  credentials to avoid errors (i.e. `athm aws rm -a`, `athm aws add-* ...`).
+- [aws] The `add` command has been replaced by the `add-saml` and `add-sso`
+  commands.
+- [aws] Added the `ls-sso-roles` command to list available roles from AWS IAM
+  Identity Center.
+
 ## 0.4.1 - 2022-08-12
 
 - Bump constraint on python to >=3.8,<3.12 (upper constraint is required by pex)

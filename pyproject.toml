@@ -4,8 +4,8 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "authum"
-version = "0.4.1"
-description = "Awesome authentication tool for connecting command line applications to SAML identity and service providers."
+version = "1.0.0"
+description = "Awesome authentication tool for connecting command line applications to SAML/OIDC identity and service providers"
 authors = ["CirrusMD <devops@cirrusmd.com>"]
 homepage = "https://github.com/CirrusMD/authum"
 
