@@ -8,6 +8,8 @@ import keyring.backend
 import mako.template
 import pytest
 
+import authum
+
 
 class TestKeyring(keyring.backend.KeyringBackend):
     priority = 0
@@ -32,7 +34,7 @@ keyring.set_keyring(TestKeyring())
 @pytest.fixture(scope="session")
 def random_string():
     rand = str(uuid.uuid4()).split("-")[0]
-    return f"authum-test-{rand}"
+    return f"{authum.metadata['name']}-test-{rand}"
 
 
 @pytest.fixture(scope="session")

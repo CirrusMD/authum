@@ -1,7 +1,6 @@
 from typing import Type
 
 import click
-import rich.console
 import rich.table
 import yaml
 
@@ -11,10 +10,6 @@ import authum.persistence
 import authum.plugin
 import authum.plugins.okta.lib
 import authum.util
-
-
-rich_stdout = rich.console.Console()
-rich_stderr = rich.console.Console(stderr=True)
 
 
 def prompt_mfa(factors: dict, gui: bool = authum.gui.PROMPT_GUI) -> dict:
@@ -31,7 +26,7 @@ def prompt_mfa(factors: dict, gui: bool = authum.gui.PROMPT_GUI) -> dict:
             ],
         )
     else:
-        table = rich.table.Table()
+        table = rich.table.Table(**authum.util.rich_table_horizontal_opts)
         table.add_column()
         table.add_column("Type")
         table.add_column("Provider")
@@ -40,7 +35,7 @@ def prompt_mfa(factors: dict, gui: bool = authum.gui.PROMPT_GUI) -> dict:
             table.add_row(
                 str(i), f["factorType"], f["provider"], yaml.dump(f["profile"])
             )
-        rich_stderr.print(table)
+        authum.util.rich_stderr.print(table)
         choice = click.prompt(prompt, type=click.IntRange(min=0, max=len(factors)))
 
     return factors[choice]
@@ -74,7 +69,7 @@ def prompt_factor_args(factor_type: str, gui: bool = authum.gui.PROMPT_GUI) -> d
 
 def get_okta_client(fail_unconfigured: bool = True) -> Type:
     """Returns an Okta client"""
-    okta_data = authum.plugins.okta.lib.okta_data
+    okta_data = authum.plugins.okta.lib.OktaData()
     if not okta_data.domain or not okta_data.username or not okta_data.password:
         if fail_unconfigured:
             raise click.ClickException("Okta plugin is not configured")
@@ -97,7 +92,7 @@ def get_okta_client(fail_unconfigured: bool = True) -> Type:
     except authum.plugins.okta.lib.OktaMFARequired as e:
         factor = prompt_mfa(e.response["_embedded"]["factors"])
         factor_args = prompt_factor_args(factor["factorType"])
-        with rich_stderr.status("Waiting for MFA verification..."):
+        with authum.util.rich_stderr.status("Waiting for MFA verification"):
             e.client.verify(e.response, factor["id"], factor_args)
 
     okta_data.session = client.session
@@ -107,7 +102,7 @@ def get_okta_client(fail_unconfigured: bool = True) -> Type:
 
 @authum.plugin.hookimpl
 def extend_cli(click_group):
-    okta_data = authum.plugins.okta.lib.okta_data
+    okta_data = authum.plugins.okta.lib.OktaData()
 
     @click_group.command()
     @click.option(
@@ -130,7 +125,7 @@ def extend_cli(click_group):
     def okta(
         domain: str, username: str, password: str, rm_session: bool, rm: bool
     ) -> None:
-        """Manage Okta data"""
+        """Manage Okta configuration"""
         if rm:
             okta_data.delete()
         else:
@@ -143,24 +138,31 @@ def extend_cli(click_group):
             if rm_session:
                 okta_data.session = {}
 
-        rich_stderr.print(okta_data.asyaml(masked_keys=["password", "session"]))
+        table = rich.table.Table(
+            title="Okta Configuration", **authum.util.rich_table_vertical_opts
+        )
+        table.add_row("Domain", okta_data.domain)
+        table.add_row("Username", okta_data.username)
+        table.add_row("Password", authum.util.sensitive_value(okta_data.password))
+        table.add_row("Session", authum.util.sensitive_value(okta_data.session))
+        authum.util.rich_stderr.print(table)
 
 
 @authum.plugin.hookimpl
-def get_apps():
+def list_apps():
     client = get_okta_client(fail_unconfigured=False)
     if not client:
         return []
 
     return [
-        authum.http.SAMLApplication(name=app["label"], url=app["linkUrl"])
+        authum.http.SSOApplication(name=app["label"], url=app["linkUrl"])
         for app in client.app_links()
     ]
 
 
 @authum.plugin.hookimpl
 def saml_request(url):
-    okta_data = authum.plugins.okta.lib.okta_data
+    okta_data = authum.plugins.okta.lib.OktaData()
     if authum.util.url_has_domain(url, okta_data.domain):
         client = get_okta_client()
         try:

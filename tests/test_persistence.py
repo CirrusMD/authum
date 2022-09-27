@@ -36,10 +36,6 @@ def test_keyring_item_len(k):
     assert len(k) == 2
 
 
-def test_keyring_item_asyaml(k):
-    assert k.asyaml(masked_keys=["foo"]) == "baz: qux\nfoo: <masked>\n"
-
-
 def test_keyring_item_save(k):
     k.save()
     new_k = authum.persistence.KeyringItem(k.keyring_item_name)

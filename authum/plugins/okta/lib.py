@@ -91,7 +91,6 @@ class OktaClient(authum.http.HTTPClient):
             try:
                 response = self.session_refresh()
                 if response.response.ok:
-                    log.debug(f"Reusing existing session")
                     return response
             except OktaError:
                 pass
@@ -276,6 +275,3 @@ class OktaData(authum.persistence.KeyringItem):
         elif "session" in self:
             del self["session"]
         self.save()
-
-
-okta_data = OktaData()

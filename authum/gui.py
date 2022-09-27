@@ -2,9 +2,9 @@ import signal
 import sys
 from typing import Type, Union
 
-import rich
+import authum
+import authum.util
 
-rich_stderr = rich.console.Console(stderr=True)
 
 HAS_TTY = sys.stdout.isatty()
 HAS_TKINTER = False
@@ -17,11 +17,13 @@ try:
     def prompt(prompt: str, type: Type = int) -> Union[None, str]:
         """Prompt for text"""
         tkinter.Tk().withdraw()
-        return sdg.askstring("Authum", prompt)
+        return sdg.askstring(authum.metadata["Name"].capitalize(), prompt)
 
     def choose(prompt: str, choices: list) -> int:
         """Prompt for choice"""
-        return ChoiceDialog(title="Authum", prompt=prompt, choices=choices).result
+        return ChoiceDialog(
+            title=authum.metadata["Name"].capitalize(), prompt=prompt, choices=choices
+        ).result
 
     class ChoiceDialog(sdg.Dialog):
         """Simple dialog box with a button for each choice"""
@@ -56,6 +58,6 @@ try:
 
 except ModuleNotFoundError as e:
     if not HAS_TTY:
-        rich_stderr.print(f"Warning: {e} (GUI prompts disabled)")
+        authum.util.rich_stderr.print(f"Warning: {e} (GUI prompts disabled)")
 
 PROMPT_GUI = not HAS_TTY and HAS_TKINTER

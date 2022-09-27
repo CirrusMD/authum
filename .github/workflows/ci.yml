@@ -2,6 +2,9 @@ name: Continuous integration
 
 on: push
 
+env:
+  AWS_DEFAULT_REGION: us-east-1
+
 jobs:
   ci:
     runs-on: ubuntu-latest
@@ -11,6 +14,8 @@ jobs:
 
       - name: Install dependencies
         run: |
+          sudo apt-get update
+          sudo apt install -y gnome-keyring
           pip3 install --upgrade pip
           pip3 install poetry
           poetry install

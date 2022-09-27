@@ -1,7 +1,6 @@
 from typing import Type
 
 import click
-import rich.console
 import rich.table
 
 import authum.gui
@@ -10,10 +9,6 @@ import authum.persistence
 import authum.plugin
 import authum.plugins.jumpcloud.lib
 import authum.util
-
-
-rich_stdout = rich.console.Console()
-rich_stderr = rich.console.Console(stderr=True)
 
 
 def prompt_mfa(factors: list, gui: bool = authum.gui.PROMPT_GUI) -> dict:
@@ -26,12 +21,12 @@ def prompt_mfa(factors: list, gui: bool = authum.gui.PROMPT_GUI) -> dict:
     if gui:
         choice = authum.gui.choose(prompt, choices=[f["type"] for f in factors])
     else:
-        table = rich.table.Table()
+        table = rich.table.Table(**authum.util.rich_table_horizontal_opts)
         table.add_column()
         table.add_column("Type")
         for i, f in enumerate(factors):
             table.add_row(str(i), f["type"])
-        rich_stderr.print(table)
+        authum.util.rich_stderr.print(table)
         choice = click.prompt(prompt, type=click.IntRange(min=0, max=len(factors)))
 
     return factors[choice]
@@ -53,7 +48,7 @@ def prompt_factor_args(factor_type: str, gui: bool = authum.gui.PROMPT_GUI) -> d
 
 def get_jumpcloud_client(fail_unconfigured: bool = True) -> Type:
     """Returns a JumpCloud client"""
-    jumpcloud_data = authum.plugins.jumpcloud.lib.jumpcloud_data
+    jumpcloud_data = authum.plugins.jumpcloud.lib.JumpCloudData()
     if not jumpcloud_data.email or not jumpcloud_data.password:
         if fail_unconfigured:
             raise click.ClickException("JumpCloud plugin is not configured")
@@ -75,7 +70,7 @@ def get_jumpcloud_client(fail_unconfigured: bool = True) -> Type:
     except authum.plugins.jumpcloud.lib.JumpCloudMFARequired as e:
         factor = prompt_mfa(e.response["factors"])
         factor_args = prompt_factor_args(factor["type"])
-        with rich_stderr.status("Waiting for MFA verification..."):
+        with authum.util.rich_stderr.status("Waiting for MFA verification"):
             getattr(e.client, f"auth_{factor['type']}")(**factor_args)
 
     jumpcloud_data.session = client.session
@@ -85,7 +80,7 @@ def get_jumpcloud_client(fail_unconfigured: bool = True) -> Type:
 
 @authum.plugin.hookimpl
 def extend_cli(click_group):
-    jumpcloud_data = authum.plugins.jumpcloud.lib.jumpcloud_data
+    jumpcloud_data = authum.plugins.jumpcloud.lib.JumpCloudData()
 
     @click_group.command()
     @click.option(
@@ -99,7 +94,7 @@ def extend_cli(click_group):
     @click.option("--rm-session", is_flag=True, help="Delete JumpCloud session data")
     @click.option("--rm", is_flag=True, help="Delete all JumpCloud data")
     def jumpcloud(email: str, password: str, rm_session: bool, rm: bool) -> None:
-        """Manage JumpCloud data"""
+        """Manage JumpCloud configuration"""
         if rm:
             jumpcloud_data.delete()
         else:
@@ -112,17 +107,23 @@ def extend_cli(click_group):
             if rm_session:
                 jumpcloud_data.session = {}
 
-        rich_stderr.print(jumpcloud_data.asyaml(masked_keys=["password", "session"]))
+        table = rich.table.Table(
+            title="JumpCloud Configuration", **authum.util.rich_table_vertical_opts
+        )
+        table.add_row("Email", jumpcloud_data.email)
+        table.add_row("Password", authum.util.sensitive_value(jumpcloud_data.password))
+        table.add_row("Session", authum.util.sensitive_value(jumpcloud_data.session))
+        authum.util.rich_stderr.print(table)
 
 
 @authum.plugin.hookimpl
-def get_apps():
+def list_apps():
     client = get_jumpcloud_client(fail_unconfigured=False)
     if not client:
         return []
 
     return [
-        authum.http.SAMLApplication(name=app["displayLabel"], url=app["ssoUrl"])
+        authum.http.SSOApplication(name=app["displayLabel"], url=app["ssoUrl"])
         for app in client.applications()
     ]
 
