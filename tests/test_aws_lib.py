@@ -51,7 +51,7 @@ def test_aws_data(random_string, credentials):
     ad = authum.plugins.aws.lib.AWSData()
 
     ad.set_credentials(random_string, credentials)
-    assert ad.credentials(random_string) == credentials
+    assert ad.list_credentials == {random_string: credentials}
 
     new_name = f"{random_string}/renamed"
     ad.mv_credentials(random_string, new_name)

@@ -4,7 +4,7 @@ lint:
 	poetry run black --check .
 
 test:
-	poetry run pytest --cov=authum
+	poetry run pytest --cov=authum --cov-report=term-missing
 
 tdd:
 	poetry run pytest -f --color=yes -o log_cli=1 --capture=tee-sys --log-level=DEBUG
