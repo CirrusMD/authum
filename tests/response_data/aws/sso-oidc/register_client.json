@@ -1,0 +1,18 @@
+{
+    "ResponseMetadata": {
+        "RequestId": "c37b5c78-56cb-4127-8e6e-b53790b2856c",
+        "HTTPStatusCode": 200,
+        "HTTPHeaders": {
+            "date": "Wed, 28 Sep 2022 19:26:25 GMT",
+            "content-type": "application/json",
+            "content-length": "1262",
+            "connection": "keep-alive",
+            "x-amzn-requestid": "c37b5c78-56cb-4127-8e6e-b53790b2856c"
+        },
+        "RetryAttempts": 0
+    },
+    "clientId": "EXAMPLECLIENTID",
+    "clientSecret": "EXAMPLECLIENTSECRET",
+    "clientIdIssuedAt": 1664393185,
+    "clientSecretExpiresAt": 1672169185
+}

@@ -1,0 +1,25 @@
+{
+    "ResponseMetadata": {
+        "RequestId": "52d50e78-19c0-4cdc-ac86-56917e630751",
+        "HTTPStatusCode": 200,
+        "HTTPHeaders": {
+            "date": "Wed, 28 Sep 2022 21:29:33 GMT",
+            "content-type": "application/json",
+            "content-length": "322",
+            "connection": "keep-alive",
+            "access-control-expose-headers": "RequestId, x-amzn-RequestId",
+            "cache-control": "no-cache",
+            "requestid": "52d50e78-19c0-4cdc-ac86-56917e630751",
+            "server": "AWS SSO",
+            "x-amzn-requestid": "52d50e78-19c0-4cdc-ac86-56917e630751"
+        },
+        "RetryAttempts": 0
+    },
+    "accountList": [
+        {
+            "accountId": "123456789012",
+            "accountName": "Test Account",
+            "emailAddress": "test@example.com"
+        }
+    ]
+}

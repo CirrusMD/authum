@@ -140,15 +140,20 @@ class AWSSSORegistration(CacheableAWSObject):
         sso_registration = self.cache.get("sso", {}).get("registration", {})
         self.load_cached_fields(cache=sso_registration)
 
-    def renew(self, force: bool = False):
+    def renew(
+        self,
+        force: bool = False,
+        boto_sso_oidc_client=None,
+    ):
         """Renew attributes from AWS"""
         self.load()
         if not force and not self.is_expired:
             return
 
         log.debug(f"Renewing SSO client registration")
-        sso_oidc = boto3.client("sso-oidc")
-        response = sso_oidc.register_client(
+        if not boto_sso_oidc_client:
+            boto_sso_oidc_client = boto3.client("sso-oidc")
+        response = boto_sso_oidc_client.register_client(
             clientName=authum.metadata["Name"], clientType="public"
         )
         log.debug(f"AWS response: {response}")
@@ -182,6 +187,8 @@ class AWSSSOAuthorization(CacheableAWSObject):
         self,
         registration: AWSSSORegistration,
         force: bool = False,
+        boto_sso_oidc_client=None,
+        launch_web_browser=True,
     ):
         """Renew attributes from AWS"""
         self.load()
@@ -189,22 +196,24 @@ class AWSSSOAuthorization(CacheableAWSObject):
             return
 
         log.debug(f"Renewing SSO client authorization for: {self.start_url}")
-        sso_oidc = boto3.client("sso-oidc")
-        authorization = sso_oidc.start_device_authorization(
+        if not boto_sso_oidc_client:
+            boto_sso_oidc_client = boto3.client("sso-oidc")
+        authorization = boto_sso_oidc_client.start_device_authorization(
             clientId=registration.client_id,
             clientSecret=registration.client_secret,
             startUrl=self.start_url,
         )
         log.debug(f"AWS response: {authorization}")
 
-        webbrowser.open(authorization["verificationUriComplete"])
+        if launch_web_browser:
+            webbrowser.open(authorization["verificationUriComplete"])
 
         response = {}
         interval = authorization["interval"]
         for i in itertools.count(1):
             try:
                 log.debug(f"Requesting SSO client token (try: {i})")
-                response = sso_oidc.create_token(
+                response = boto_sso_oidc_client.create_token(
                     clientId=registration.client_id,
                     clientSecret=registration.client_secret,
                     grantType="urn:ietf:params:oauth:grant-type:device_code",
@@ -212,9 +221,9 @@ class AWSSSOAuthorization(CacheableAWSObject):
                 )
                 log.debug(f"AWS response: {response}")
                 break
-            except sso_oidc.exceptions.AuthorizationPendingException:
+            except boto_sso_oidc_client.exceptions.AuthorizationPendingException:
                 pass
-            except sso_oidc.exceptions.SlowDownException:
+            except boto_sso_oidc_client.exceptions.SlowDownException:
                 interval += 5
                 pass
             time.sleep(interval)
@@ -239,27 +248,41 @@ class AWSSSOClient:
         start_url: str,
         force_renew_registration: bool = False,
         force_renew_authorization: bool = False,
+        boto_sso_oidc_client=None,
+        launch_web_browser=True,
     ) -> None:
         self.registration = AWSSSORegistration()
-        self.registration.renew(force=force_renew_registration)
+        self.registration.renew(
+            force=force_renew_registration, boto_sso_oidc_client=boto_sso_oidc_client
+        )
         self.authorization = AWSSSOAuthorization(start_url=start_url)
         with authum.util.rich_stderr.status("Waiting for device authorization"):
             self.authorization.renew(
                 registration=self.registration,
                 force=force_renew_authorization,
+                boto_sso_oidc_client=boto_sso_oidc_client,
+                launch_web_browser=launch_web_browser,
             )
 
-    def list_accounts(self) -> list:
+    def list_accounts(self, boto_sso_client=None) -> list:
         """Returns a list of available accounts and roles"""
         account_list = []
 
-        sso = boto3.client("sso")
-        accounts = sso.list_accounts(accessToken=self.authorization.access_token)
+        log.debug(f"Requesting account list")
+        if not boto_sso_client:
+            boto_sso_client = boto3.client("sso")
+        accounts = boto_sso_client.list_accounts(
+            accessToken=self.authorization.access_token
+        )
+        log.debug(f"AWS response: {accounts}")
+
         for account in accounts["accountList"]:
-            roles = sso.list_account_roles(
+            log.debug(f"Requesting roles for account: {account['accountId']}")
+            roles = boto_sso_client.list_account_roles(
                 accessToken=self.authorization.access_token,
                 accountId=account["accountId"],
             )
+            log.debug(f"AWS response: {roles}")
             account_list.append(
                 {**account, "roles": [r["roleName"] for r in roles["roleList"]]}
             )
@@ -314,18 +337,20 @@ class AWSRoleCredentials(CacheableAWSObject):
             text=True,
         )
 
-    def assume_role(self):
+    def assume_role(self, boto_sts_client=None):
         """Assumes a role"""
-        sts = boto3.client(
-            "sts",
-            aws_access_key_id=self.access_key_id,
-            aws_secret_access_key=self.secret_access_key,
-            aws_session_token=self.session_token,
-            endpoint_url=self.sts_endpoint if self.sts_endpoint else None,
-        )
+
+        if not boto_sts_client:
+            boto_sts_client = boto3.client(
+                "sts",
+                aws_access_key_id=self.access_key_id,
+                aws_secret_access_key=self.secret_access_key,
+                aws_session_token=self.session_token,
+                endpoint_url=self.sts_endpoint if self.sts_endpoint else None,
+            )
 
         log.debug(f"Requesting STS caller identity")
-        response = sts.get_caller_identity()
+        response = boto_sts_client.get_caller_identity()
         log.debug(f"AWS response: {response}")
 
         assume_role_args = {
@@ -338,7 +363,7 @@ class AWSRoleCredentials(CacheableAWSObject):
             assume_role_args["ExternalId"] = self.assume_role_external_id
 
         log.debug(f"Assuming role: {self.assume_role_arn}")
-        response = sts.assume_role(**assume_role_args)
+        response = boto_sts_client.assume_role(**assume_role_args)
         log.debug(f"AWS response: {response}")
 
         self.access_key_id = response["Credentials"]["AccessKeyId"]
@@ -362,19 +387,24 @@ class AWSSSORoleCredentials(AWSRoleCredentials):
     def renew(
         self,
         force: bool = False,
+        sso_client=None,
+        boto_sso_client=None,
+        boto_sts_client=None,
     ):
         """Renew attributes from AWS"""
         self.load()
         if not force and not self.is_expired:
             return
 
-        client = AWSSSOClient(start_url=self.start_url)
+        if not sso_client:
+            sso_client = AWSSSOClient(start_url=self.start_url)
         log.debug(
             f"Renewing SSO role credentials for: start_url={self.start_url}, account_id={self.account_id}, role_name={self.role_name}"
         )
-        sso = boto3.client("sso")
-        response = sso.get_role_credentials(
-            accessToken=client.authorization.access_token,
+        if not boto_sso_client:
+            boto_sso_client = boto3.client("sso")
+        response = boto_sso_client.get_role_credentials(
+            accessToken=sso_client.authorization.access_token,
             accountId=self.account_id,
             roleName=self.role_name,
         )
@@ -386,7 +416,7 @@ class AWSSSORoleCredentials(AWSRoleCredentials):
         self.expiration_timestamp = response["roleCredentials"]["expiration"] / 1000.0
 
         if self.assume_role_arn:
-            self.assume_role()
+            self.assume_role(boto_sts_client=boto_sts_client)
 
         self.cache.setdefault("credentials", {})[self.name] = dataclasses.asdict(self)
         self.cache.save()
@@ -402,10 +432,7 @@ class AWSSAMLRoleCredentials(AWSRoleCredentials):
         super().__post_init__()
         self.require_fields("saml_url")
 
-    def renew(
-        self,
-        force: bool = False,
-    ):
+    def renew(self, force: bool = False):
         """Renew attributes from AWS"""
         self.load()
         if not force and not self.is_expired:
@@ -437,10 +464,10 @@ class AWSSAMLRoleCredentials(AWSRoleCredentials):
             pass
 
         log.debug(f"Renewing SAML role credentials for: {self.saml_url}")
-        sts = boto3.client(
+        boto_sts_client = boto3.client(
             "sts", endpoint_url=self.sts_endpoint if self.sts_endpoint else None
         )
-        response = sts.assume_role_with_saml(**assume_role_args)
+        response = boto_sts_client.assume_role_with_saml(**assume_role_args)
         log.debug(f"AWS response: {response}")
 
         self.access_key_id = response["Credentials"]["AccessKeyId"]

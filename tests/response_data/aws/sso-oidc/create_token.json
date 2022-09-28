@@ -1,0 +1,17 @@
+{
+    "ResponseMetadata": {
+        "RequestId": "373e6519-d705-4ae2-1981-f08b4cbe30a4",
+        "HTTPStatusCode": 200,
+        "HTTPHeaders": {
+            "date": "Wed, 28 Sep 2022 21:23:54 GMT",
+            "content-type": "application/json",
+            "content-length": "1354",
+            "connection": "keep-alive",
+            "x-amzn-requestid": "373e6519-d705-4ae2-1981-f08b4cbe30a4"
+        },
+        "RetryAttempts": 0
+    },
+    "accessToken": "EXAMPLEACCESSTOKEN",
+    "tokenType": "Bearer",
+    "expiresIn": 28800
+}

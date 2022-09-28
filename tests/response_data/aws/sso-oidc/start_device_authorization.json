@@ -1,0 +1,20 @@
+{
+    "ResponseMetadata": {
+        "RequestId": "14e58f30-5608-450f-9ef1-e2d23a72b0b1",
+        "HTTPStatusCode": 200,
+        "HTTPHeaders": {
+            "date": "Wed, 28 Sep 2022 21:14:44 GMT",
+            "content-type": "application/json",
+            "content-length": "311",
+            "connection": "keep-alive",
+            "x-amzn-requestid": "14e58f30-5608-450f-9ef1-e2d23a72b0b1"
+        },
+        "RetryAttempts": 0
+    },
+    "deviceCode": "EXAMPLEDEVICECODE",
+    "userCode": "EXAMPLEUSERCODE",
+    "verificationUri": "https://device.sso.us-east-1.amazonaws.com/",
+    "verificationUriComplete": "https://device.sso.us-east-1.amazonaws.com/?user_code=EXAMPLEUSERCODE",
+    "expiresIn": 600,
+    "interval": 1
+}

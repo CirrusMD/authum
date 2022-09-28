@@ -1,0 +1,16 @@
+{
+    "ResponseMetadata": {
+        "RequestId": "58433640-5435-300f-bdad-d2724b46db37",
+        "HTTPStatusCode": 200,
+        "HTTPHeaders": {
+            "x-amzn-requestid": "58433640-5435-300f-bdad-d2724b46db37",
+            "content-type": "text/xml",
+            "content-length": "483",
+            "date": "Thu, 29 Sep2022 17: 48: 30 GMT"
+        },
+        "RetryAttempts": 0
+    },
+    "UserId": "EXAMPLEACCESSKEY:test@example.com",
+    "Account": "123456789012",
+    "Arn": "arn:aws:sts::123456789012:assumed-role/TestRole/test@example.com"
+}

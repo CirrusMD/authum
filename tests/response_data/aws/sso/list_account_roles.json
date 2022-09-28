@@ -1,0 +1,28 @@
+{
+    "ResponseMetadata": {
+        "RequestId": "6402a416-72ff-46e6-a753-90c31e4aa38b",
+        "HTTPStatusCode": 200,
+        "HTTPHeaders": {
+            "date": "Wed, 28 Sep 2022 21:46:27 GMT",
+            "content-type": "application/json",
+            "content-length": "80",
+            "connection": "keep-alive",
+            "access-control-expose-headers": "RequestId, x-amzn-RequestId",
+            "cache-control": "no-cache",
+            "requestid": "6402a416-72ff-46e6-a753-90c31e4aa38b",
+            "server": "AWS SSO",
+            "x-amzn-requestid": "6402a416-72ff-46e6-a753-90c31e4aa38b"
+        },
+        "RetryAttempts": 0
+    },
+    "roleList": [
+        {
+            "roleName": "Test SSO",
+            "accountId": "123456789012"
+        },
+        {
+            "roleName": "Test SAML",
+            "accountId": "123456789012"
+        }
+    ]
+}

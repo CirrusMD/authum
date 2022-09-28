@@ -1,0 +1,23 @@
+{
+    "ResponseMetadata": {
+        "RequestId": "787bb6f6-f228-4130-8c23-ae3b38bdf6c9",
+        "HTTPStatusCode": 200,
+        "HTTPHeaders": {
+            "x-amzn-requestid": "787bb6f6-f228-4130-8c23-ae3b38bdf6c9",
+            "content-type": "text/xml",
+            "content-length": "1107",
+            "date": "Thu, 29 Sep 2022 17:40:33 GMT"
+        },
+        "RetryAttempts": 0
+    },
+    "Credentials": {
+        "AccessKeyId": "EXAMPLESTSACCESSKEY",
+        "SecretAccessKey": "EXAMPLESTSSECRETACCESSKEY",
+        "SessionToken": "EXAMPLESTSSESSIONTOKEN",
+        "Expiration": "Thu, 29 Sep 2022 18:40:33 GMT"
+    },
+    "AssumedRoleUser": {
+        "AssumedRoleId": "EXAMPLEACCESSKEY:test@example.com",
+        "Arn": "arn:aws:sts: : 123456789012:assumed-role/TestRole/test@example.com"
+    }
+}
