@@ -78,6 +78,18 @@ def extend_cli(click_group):
         role.renew(force=True)
         ctx.invoke(ls)
 
+    @aws.command()
+    @click.argument("start_url_or_subdomain")
+    def authorize_sso(start_url_or_subdomain: str):
+        """Perform SSO client registration/authorization"""
+        authum.plugins.aws.lib.AWSSSOClient(
+            start_url=authum.plugins.aws.lib.normalize_start_url(
+                start_url_or_subdomain
+            ),
+            force_renew_registration=True,
+            force_renew_authorization=True,
+        )
+
     @aws.command(context_settings=dict(ignore_unknown_options=True))
     @click.option("-r", "--rotate", is_flag=True, help="Force credential rotation")
     @click.argument("name")
@@ -150,9 +162,8 @@ def extend_cli(click_group):
             authum.util.rich_stderr.print(table)
 
     @aws.command()
-    @click.pass_context
     @click.argument("start_url_or_subdomain")
-    def ls_sso_roles(ctx: click.Context, start_url_or_subdomain: str):
+    def ls_sso_roles(start_url_or_subdomain: str):
         """List available SSO roles"""
         client = authum.plugins.aws.lib.AWSSSOClient(
             start_url=authum.plugins.aws.lib.normalize_start_url(start_url_or_subdomain)
