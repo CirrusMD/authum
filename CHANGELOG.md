@@ -1,5 +1,10 @@
 # CHANGELOG
 
+### 1.1.0 - 2022-10-18
+
+- [aws] Added `authorize_sso` command to force SSO client
+  registration/authorization.
+
 ## 1.0.0 - 2022-09-27
 
 - Aliases and associated commands have been removed, so it's OK to delete the
