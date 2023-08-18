@@ -17,9 +17,6 @@ pex:
 	poetry export --without-hashes > ${REQUIREMENTS}
 	poetry run pex -r ${REQUIREMENTS} -e authum.cli:main -o dist/athm .
 
-install:
-	cp dist/athm /usr/local/bin
-
 release:
 	$(eval VERSION=`poetry version -s`)
 	git tag -a v${VERSION} -m "Release version ${VERSION}"
