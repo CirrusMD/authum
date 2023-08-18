@@ -22,11 +22,13 @@ SAML/OIDC identity and service providers. Authum is the successor to
 ## Installation
 
 1. Install [Poetry](https://python-poetry.org)
+    - `brew install poetry`
 1. Clone this repository
 1. `cd /path/to/repository`
 1. `poetry install`
 1. `make pex`
-1. `make install`
+1. Copy `dist/athm` to a location in $PATH
+    - Homebrewers `cp dist/athm $(eval brew --prefix)/bin`
 1. `rehash` to update binaries in `$PATH`
 
 ### Graphical Prompts
