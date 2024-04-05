@@ -7,6 +7,8 @@ Awesome authentication tool for connecting command line applications to
 SAML/OIDC identity and service providers. Authum is the successor to
 [aws-jumpcloud](https://github.com/CirrusMD/aws-jumpcloud).
 
+[Lens Kube Setup](https://cirrusmd.atlassian.net/wiki/spaces/EN/pages/556662796/Lens+Kube+Setup)
+
 ## Features
 
 - Support for **ANY** SAML/OIDC identity and service provider via
