@@ -6,7 +6,7 @@ authors = [
 ]
 description = "Awesome authentication tool for connecting command line applications to SAML/OIDC identity and service providers"
 readme = "README.md"
-requires-python = "~=3.8"
+requires-python = "~=3.9"
 dependencies = [
     "arn~=0.1.5",
     "beautifulsoup4~=4.10",

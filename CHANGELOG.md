@@ -1,6 +1,10 @@
 # CHANGELOG
 
-### 1.1.0 - 2022-10-18
+## 1.2.0 - Pending
+
+- Require Python >=3.9
+
+## 1.1.0 - 2022-10-18
 
 - [aws] Added `authorize_sso` command to force SSO client
   registration/authorization.
