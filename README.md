@@ -23,11 +23,12 @@ SAML/OIDC identity and service providers. Authum is the successor to
 
 ## Installation
 
-1. Install [Poetry](https://python-poetry.org)
-    - `brew install poetry`
+1. Install [uv](https://docs.astral.sh/uv/)
+    - `brew install uv`
 1. Clone this repository
 1. `cd /path/to/repository`
-1. `poetry install`
+1. `uv python install`
+1. `uv sync`
 1. `make pex`
 1. Copy `dist/athm` to a location in $PATH
     - Homebrewers `cp dist/athm $(eval brew --prefix)/bin`
@@ -64,11 +65,11 @@ athm --debug <command>
 
 ## Development
 
-1. Install [Poetry](https://python-poetry.org)
+1. Install [uv](https://docs.astral.sh/uv/)
 1. Clone this repository
 1. `cd /path/to/repository`
-1. `poetry install`
-1. `poetry shell`
+1. `uv python install`
+1. `uv sync`
 
 ### Running Tests
 
@@ -80,6 +81,6 @@ See [Developing Authum Plugins](authum/plugins/)
 
 ### Releasing New Versions
 
-1. Bump the version (e.g. run [poetry version](https://python-poetry.org/docs/cli/#version))
+1. Bump the version
 1. Update the [CHANGELOG](./CHANGELOG.md)
 1. Run `make release`
