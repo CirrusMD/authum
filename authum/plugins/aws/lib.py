@@ -6,8 +6,8 @@ import logging
 import os
 import subprocess
 import time
-from typing import ClassVar, Union
 import webbrowser
+from typing import ClassVar, Union
 
 import arn.iam
 import boto3
@@ -17,7 +17,6 @@ import authum.http
 import authum.persistence
 import authum.plugin
 import authum.util
-
 
 logging.getLogger("botocore").propagate = False
 log = logging.getLogger(__name__)
@@ -150,7 +149,7 @@ class AWSSSORegistration(CacheableAWSObject):
         if not force and not self.is_expired:
             return
 
-        log.debug(f"Renewing SSO client registration")
+        log.debug("Renewing SSO client registration")
         if not boto_sso_oidc_client:
             boto_sso_oidc_client = boto3.client("sso-oidc")
         response = boto_sso_oidc_client.register_client(
@@ -268,7 +267,7 @@ class AWSSSOClient:
         """Returns a list of available accounts and roles"""
         account_list = []
 
-        log.debug(f"Requesting account list")
+        log.debug("Requesting account list")
         if not boto_sso_client:
             boto_sso_client = boto3.client("sso")
         accounts = boto_sso_client.list_accounts(
@@ -349,7 +348,7 @@ class AWSRoleCredentials(CacheableAWSObject):
                 endpoint_url=self.sts_endpoint if self.sts_endpoint else None,
             )
 
-        log.debug(f"Requesting STS caller identity")
+        log.debug("Requesting STS caller identity")
         response = boto_sts_client.get_caller_identity()
         log.debug(f"AWS response: {response}")
 
@@ -452,7 +451,7 @@ class AWSSAMLRoleCredentials(AWSRoleCredentials):
                 ","
             )
         except IndexError:
-            raise AWSPluginError(f"No role ARN found in SAML assertion")
+            raise AWSPluginError("No role ARN found in SAML assertion")
 
         try:
             assume_role_args["DurationSeconds"] = int(

@@ -1,7 +1,8 @@
-import click
 import os
-import rich.table
 import sys
+
+import click
+import rich.table
 
 import authum.plugin
 import authum.plugins.aws.lib

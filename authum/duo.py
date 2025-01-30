@@ -3,7 +3,6 @@ import logging
 import socket
 import threading
 import time
-from typing import Union
 import webbrowser
 
 import flask
@@ -11,7 +10,6 @@ import flask.cli
 
 import authum
 import authum.http
-
 
 flask.cli.show_server_banner = lambda *args: None
 logging.getLogger("werkzeug").disabled = True

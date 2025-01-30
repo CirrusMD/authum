@@ -102,7 +102,7 @@ def extend_cli(click_group):
                 jumpcloud_data.email = email
             if password:
                 jumpcloud_data.password = click.prompt(
-                    f"JumpCloud password", hide_input=True
+                    "JumpCloud password", hide_input=True
                 )
             if rm_session:
                 jumpcloud_data.session = {}

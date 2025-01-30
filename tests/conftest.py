@@ -1,7 +1,7 @@
 import os
 import pathlib
-from typing import Any
 import uuid
+from typing import Any
 
 import keyring
 import keyring.backend

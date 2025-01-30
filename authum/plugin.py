@@ -6,7 +6,6 @@ import sys
 
 import pluggy
 
-
 PLUGIN_MODULE_BUILTIN_PATH = os.path.join(os.path.dirname(__file__), "plugins")
 PLUGIN_MODULE_BUILTIN_PREFIX = f"{__package__}.plugins."
 PLUGIN_MODULE_PREFIX = f"{__package__}-"

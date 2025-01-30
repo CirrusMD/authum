@@ -103,7 +103,7 @@ class JumpCloudClient(authum.http.HTTPClient):
 
     def xsrf(self) -> authum.http.RESTResponse:
         """Requests an XSRF token, updates the session, and returns the response"""
-        log.debug(f"Requesting XSRF token")
+        log.debug("Requesting XSRF token")
         response = self.rest_request(url=self.urls["xsrf"], method="get")
 
         log.debug("Saving session data")

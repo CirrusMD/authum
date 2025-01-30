@@ -5,9 +5,8 @@ import time
 from typing import Type, Union
 
 import authum.duo
-import authum.persistence
 import authum.http
-
+import authum.persistence
 
 log = logging.getLogger(__name__)
 
@@ -174,7 +173,7 @@ class OktaClient(authum.http.HTTPClient):
 
         See: https://developer.okta.com/docs/reference/api/sessions/
         """
-        log.debug(f"Creating session")
+        log.debug("Creating session")
         response = self.rest_request(
             url=self.urls["sessions"],
             method="post",
@@ -195,7 +194,7 @@ class OktaClient(authum.http.HTTPClient):
         if not self._session.refresh_url:
             raise OktaError("No session refresh URL found")
 
-        log.debug(f"Refreshing session")
+        log.debug("Refreshing session")
         return self.rest_request(url=self._session.refresh_url, method="post")
 
     def app_links(self) -> authum.http.RESTResponse:

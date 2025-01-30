@@ -9,7 +9,6 @@ import authum
 import authum.plugin
 import authum.util
 
-
 authum.plugin.load_plugins()
 plugin_list = "\n".join(
     f"- {p.__name__.split('.')[-1]} ({p.__name__})"

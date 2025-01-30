@@ -1,14 +1,13 @@
 import base64
-from collections.abc import Mapping
 import dataclasses
 import json
 import logging
-from typing import Any, Iterable
 import xml.etree.ElementTree
+from collections.abc import Mapping
+from typing import Any, Iterable
 
 import bs4
 import requests
-
 
 log = logging.getLogger(__name__)
 

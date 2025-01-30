@@ -5,7 +5,6 @@ from typing import Type, Union
 import authum
 import authum.util
 
-
 HAS_TTY = sys.stdout.isatty()
 HAS_TKINTER = False
 try:

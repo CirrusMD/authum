@@ -3,8 +3,8 @@ import os
 import pytest
 import responses
 
-import authum.plugins.jumpcloud.lib
 import authum.http
+import authum.plugins.jumpcloud.lib
 
 
 @pytest.fixture

@@ -1,10 +1,9 @@
-from typing import Any
 import urllib.parse
+from typing import Any
 
 import rich.box
 import rich.console
 import rich.table
-
 
 rich_stdout = rich.console.Console(soft_wrap=True)
 rich_stderr = rich.console.Console(stderr=True)

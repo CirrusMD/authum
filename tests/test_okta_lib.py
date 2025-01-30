@@ -3,8 +3,8 @@ import os
 import pytest
 import responses
 
-import authum.plugins.okta.lib
 import authum.http
+import authum.plugins.okta.lib
 
 
 @pytest.fixture

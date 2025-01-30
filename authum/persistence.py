@@ -1,11 +1,10 @@
-from collections.abc import MutableMapping
 import json
 import logging
+from collections.abc import MutableMapping
 from typing import Any, Iterable
 
 import keyring
 import keyring.errors
-
 
 log = logging.getLogger(__name__)
 
