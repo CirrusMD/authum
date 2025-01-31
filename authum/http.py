@@ -88,16 +88,16 @@ class SAMLAssertionAttributes(Mapping):
         self.attribute_statement = root.find(".//saml:AttributeStatement", self.ns)
 
     def __getitem__(self, k: str) -> list:
-        if not self.attribute_statement:
+        if self.attribute_statement is None:
             return []
 
         attr = self.attribute_statement.find(f".//saml:Attribute[@Name='{k}']", self.ns)
-        if not attr:
+        if attr is None:
             raise KeyError(k)
         return [v.text for v in attr.findall(".//saml:AttributeValue", self.ns)]
 
     def __iter__(self) -> Iterable:
-        if not self.attribute_statement:
+        if self.attribute_statement is None:
             return []
 
         return (
