@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Union
 
 import click
 import rich.table
@@ -46,7 +46,9 @@ def prompt_factor_args(factor_type: str, gui: bool = authum.gui.PROMPT_GUI) -> d
         )
 
 
-def get_jumpcloud_client(fail_unconfigured: bool = True) -> Type:
+def get_jumpcloud_client(
+    fail_unconfigured: bool = True,
+) -> Union["authum.plugins.jumpcloud.lib.JumpCloudClient", None]:
     """Returns a JumpCloud client"""
     jumpcloud_data = authum.plugins.jumpcloud.lib.JumpCloudData()
     if not jumpcloud_data.email or not jumpcloud_data.password:
@@ -93,7 +95,7 @@ def extend_cli(click_group):
     @click.option("--password", "-p", is_flag=True, help="Set JumpCloud password")
     @click.option("--rm-session", is_flag=True, help="Delete JumpCloud session data")
     @click.option("--rm", is_flag=True, help="Delete all JumpCloud data")
-    def jumpcloud(email: str, password: str, rm_session: bool, rm: bool) -> None:
+    def jumpcloud(email: str, password: str, rm_session: bool, rm: bool):
         """Manage JumpCloud configuration"""
         if rm:
             jumpcloud_data.delete()
@@ -105,7 +107,7 @@ def extend_cli(click_group):
                     "JumpCloud password", hide_input=True
                 )
             if rm_session:
-                jumpcloud_data.session = {}
+                jumpcloud_data.session = None
 
         table = rich.table.Table(
             title="JumpCloud Configuration", **authum.util.rich_table_vertical_opts

@@ -15,8 +15,8 @@ class KeyringItem(MutableMapping):
     with: `keyring get authum <name>`
     """
 
-    def __init__(self, name: str, initial: dict = {}) -> None:
-        self._service = __package__
+    def __init__(self, name: str, initial: dict = {}):
+        self._service = "authum"
         self._name = name
 
         self._data = {}
@@ -29,10 +29,10 @@ class KeyringItem(MutableMapping):
     def __getitem__(self, k: Any) -> Any:
         return self._data[k]
 
-    def __setitem__(self, k: Any, v: Any) -> None:
+    def __setitem__(self, k: Any, v: Any):
         self._data[k] = v
 
-    def __delitem__(self, k: Any) -> None:
+    def __delitem__(self, k: Any):
         del self._data[k]
 
     def __iter__(self) -> Iterable:
@@ -45,7 +45,7 @@ class KeyringItem(MutableMapping):
         """Return the item as a dict"""
         return dict(self)
 
-    def load(self) -> None:
+    def load(self):
         """Loads data from a keyring item"""
         try:
             self._data = json.loads(
@@ -57,7 +57,7 @@ class KeyringItem(MutableMapping):
         except json.decoder.JSONDecodeError:
             pass
 
-    def save(self) -> None:
+    def save(self):
         """Saves data to a keyring item"""
         log.debug(
             f"Saving keyring data to '{self._service}.{self._name}' with keys={list(self.keys())}"
@@ -66,7 +66,7 @@ class KeyringItem(MutableMapping):
             self._service, self._name, json.dumps(self._data, default=str)
         )
 
-    def delete(self) -> None:
+    def delete(self):
         """Deletes a keyring item"""
         log.debug(f"Deleting keyring item: '{self._service}.{self._name}'")
         try:

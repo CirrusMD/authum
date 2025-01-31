@@ -1,3 +1,3 @@
 import importlib.metadata
 
-metadata = importlib.metadata.metadata(__package__)
+metadata = importlib.metadata.metadata("authum")

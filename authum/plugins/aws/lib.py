@@ -25,10 +25,10 @@ log = logging.getLogger(__name__)
 class AWSData(authum.persistence.KeyringItem):
     """Represents persistent AWS data"""
 
-    def __init__(self) -> None:
+    def __init__(self):
         super().__init__("aws")
 
-    def set_credentials(self, name: str, v: "AWSRoleCredentials") -> None:
+    def set_credentials(self, name: str, v: "AWSRoleCredentials"):
         """Save credentials"""
         self.setdefault("credentials", {})[name] = dataclasses.asdict(v)
         self.save()
@@ -43,12 +43,12 @@ class AWSData(authum.persistence.KeyringItem):
         else:
             return AWSSAMLRoleCredentials(**args)
 
-    def mv_credentials(self, current_name: str, new_name: str) -> None:
+    def mv_credentials(self, current_name: str, new_name: str):
         """Rename credentials"""
         self.set_credentials(new_name, self.credentials(current_name))
         self.rm_credentials(current_name)
 
-    def rm_credentials(self, name: str) -> None:
+    def rm_credentials(self, name: str):
         """Delete a credentials by name"""
         del self.get("credentials", {})[name]
         self.save()
@@ -110,7 +110,7 @@ class CacheableAWSObject(abc.ABC):
         self,
         cache: dict,
         fields: list = [],
-    ) -> None:
+    ):
         """Load list of fields from the cache"""
         if not fields:
             fields = [f.name for f in dataclasses.fields(self)]
@@ -120,7 +120,7 @@ class CacheableAWSObject(abc.ABC):
             if not local_val:
                 setattr(self, field, cache.get(field, local_val))
 
-    def require_fields(self, *fields: str) -> None:
+    def require_fields(self, *fields: str):
         """Check for required fields"""
         missing_fields = [field for field in fields if not getattr(self, field)]
         if missing_fields:
@@ -249,7 +249,7 @@ class AWSSSOClient:
         force_renew_authorization: bool = False,
         boto_sso_oidc_client=None,
         launch_web_browser=True,
-    ) -> None:
+    ):
         self.registration = AWSSSORegistration()
         self.registration.renew(
             force=force_renew_registration, boto_sso_oidc_client=boto_sso_oidc_client

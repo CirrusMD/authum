@@ -15,7 +15,7 @@ log = logging.getLogger(__name__)
 class RESTResponse(Mapping):
     """Represents a REST response"""
 
-    def __init__(self, response: requests.Response = requests.Response()) -> None:
+    def __init__(self, response: requests.Response = requests.Response()):
         super().__init__()
 
         self._response = response
@@ -47,7 +47,7 @@ class RESTResponse(Mapping):
 class SAMLAssertion:
     """Represents a SAML assertion"""
 
-    def __init__(self, saml_assertion: str) -> None:
+    def __init__(self, saml_assertion: str):
         try:
             self._xml = base64.b64decode(saml_assertion).decode()
             self._b64encoded = saml_assertion
@@ -79,7 +79,7 @@ class SAMLAssertion:
 class SAMLAssertionAttributes(Mapping):
     """Provides a simple dict-like interface for SAML assertion attributes"""
 
-    def __init__(self, saml_assertion: str) -> None:
+    def __init__(self, saml_assertion: str):
         self.ns = {
             "samlp": "urn:oasis:names:tc:SAML:2.0:protocol",
             "saml": "urn:oasis:names:tc:SAML:2.0:assertion",
@@ -123,7 +123,7 @@ class SSOApplication:
 class HTTPClient:
     """Simple HTTP client"""
 
-    def __init__(self) -> None:
+    def __init__(self):
         self._client = requests.Session()
 
     def http_request(self, **kwargs) -> requests.Response:

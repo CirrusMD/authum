@@ -1,6 +1,6 @@
 import dataclasses
 import logging
-from typing import Type, Union
+from typing import Union
 
 import authum.duo
 import authum.http
@@ -28,7 +28,7 @@ class JumpCloudClient(authum.http.HTTPClient):
         email: str,
         password: str,
         session: JumpCloudClientSession = JumpCloudClientSession(),
-    ) -> None:
+    ):
         super().__init__()
 
         self._email = email
@@ -154,9 +154,7 @@ class JumpCloudClient(authum.http.HTTPClient):
 class JumpCloudMFARequired(Exception):
     """Raised when multi-factor authentication is required"""
 
-    def __init__(
-        self, client: JumpCloudClient, response: authum.http.RESTResponse
-    ) -> None:
+    def __init__(self, client: JumpCloudClient, response: authum.http.RESTResponse):
         self.client = client
         self.response = response
 
@@ -168,7 +166,7 @@ class JumpCloudError(Exception):
 class JumpCloudData(authum.persistence.KeyringItem):
     """Represents persistent JumpCloud data"""
 
-    def __init__(self) -> None:
+    def __init__(self):
         super().__init__("jumpcloud")
 
     @property
@@ -180,21 +178,21 @@ class JumpCloudData(authum.persistence.KeyringItem):
         return self.get("password", "")
 
     @property
-    def session(self) -> Type:
+    def session(self) -> JumpCloudClientSession:
         return JumpCloudClientSession(**self.get("session", {}))
 
     @email.setter
-    def email(self, v: str) -> None:
+    def email(self, v: str):
         self["email"] = v
         self.save()
 
     @password.setter
-    def password(self, v: str) -> None:
+    def password(self, v: str):
         self["password"] = v
         self.save()
 
     @session.setter
-    def session(self, v: Type) -> None:
+    def session(self, v: Union[JumpCloudClientSession, None]):
         if v:
             self["session"] = dataclasses.asdict(v)
         elif "session" in self:

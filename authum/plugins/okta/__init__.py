@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Union
 
 import click
 import rich.table
@@ -67,7 +67,9 @@ def prompt_factor_args(factor_type: str, gui: bool = authum.gui.PROMPT_GUI) -> d
         )
 
 
-def get_okta_client(fail_unconfigured: bool = True) -> Type:
+def get_okta_client(
+    fail_unconfigured: bool = True,
+) -> Union["authum.plugins.okta.lib.OktaClient", None]:
     """Returns an Okta client"""
     okta_data = authum.plugins.okta.lib.OktaData()
     if not okta_data.domain or not okta_data.username or not okta_data.password:
@@ -122,9 +124,7 @@ def extend_cli(click_group):
     @click.option("--password", "-p", is_flag=True, help="Set Okta password")
     @click.option("--rm-session", is_flag=True, help="Delete Okta session data")
     @click.option("--rm", is_flag=True, help="Delete all Okta data")
-    def okta(
-        domain: str, username: str, password: str, rm_session: bool, rm: bool
-    ) -> None:
+    def okta(domain: str, username: str, password: str, rm_session: bool, rm: bool):
         """Manage Okta configuration"""
         if rm:
             okta_data.delete()
@@ -136,7 +136,7 @@ def extend_cli(click_group):
             if password:
                 okta_data.password = click.prompt("Okta password", hide_input=True)
             if rm_session:
-                okta_data.session = {}
+                okta_data.session = None
 
         table = rich.table.Table(
             title="Okta Configuration", **authum.util.rich_table_vertical_opts

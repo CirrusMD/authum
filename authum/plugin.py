@@ -4,20 +4,22 @@ import os
 import pkgutil
 import sys
 
+import click
 import pluggy
 
+PACKAGE_NAME = "authum"
 PLUGIN_MODULE_BUILTIN_PATH = os.path.join(os.path.dirname(__file__), "plugins")
-PLUGIN_MODULE_BUILTIN_PREFIX = f"{__package__}.plugins."
-PLUGIN_MODULE_PREFIX = f"{__package__}-"
+PLUGIN_MODULE_BUILTIN_PREFIX = f"{PACKAGE_NAME}.plugins."
+PLUGIN_MODULE_PREFIX = f"{PACKAGE_NAME}-"
 
 log = logging.getLogger(__name__)
 
-hookspec = pluggy.HookspecMarker(__package__)
-hookimpl = pluggy.HookimplMarker(__package__)
+hookspec = pluggy.HookspecMarker(PACKAGE_NAME)
+hookimpl = pluggy.HookimplMarker(PACKAGE_NAME)
 
 
 @hookspec
-def extend_cli(click_group):
+def extend_cli(click_group: click.Group):
     """Adds CLI parameters/arguments
 
     Args:
@@ -40,7 +42,7 @@ def list_apps():
 
 
 @hookspec(firstresult=True)
-def saml_request(url):
+def saml_request(url: str):
     """Performs a SAML request and returns the response. Note that it's up to
     each plugin to decide whether it should handle requests for a given URL
     (e.g. by checking the domain name).
@@ -83,6 +85,6 @@ def hookcall_monitoring_after(outcome, hook_name, hook_impls, kwargs):
     log.debug(f"Hook result for '{hook_name}': {outcome.get_result()}")
 
 
-manager = pluggy.PluginManager(__package__)
+manager = pluggy.PluginManager(PACKAGE_NAME)
 manager.add_hookspecs(sys.modules[__name__])
 manager.add_hookcall_monitoring(hookcall_monitoring_before, hookcall_monitoring_after)

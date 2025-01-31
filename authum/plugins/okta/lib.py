@@ -2,7 +2,7 @@ import dataclasses
 import itertools
 import logging
 import time
-from typing import Type, Union
+from typing import Union
 
 import authum.duo
 import authum.http
@@ -32,7 +32,7 @@ class OktaClient(authum.http.HTTPClient):
         password: str,
         session: OktaClientSession = OktaClientSession(),
         poll_interval: float = 2.0,
-    ) -> None:
+    ):
         super().__init__()
 
         self._domain = domain
@@ -150,7 +150,7 @@ class OktaClient(authum.http.HTTPClient):
     def verify_web(
         self,
         response: authum.http.RESTResponse,
-    ) -> None:
+    ):
         """Performs MFA factor verification for the "web" factor type.
 
         See: https://developer.okta.com/docs/reference/api/authn/#verify-duo-factor
@@ -209,7 +209,7 @@ class OktaClient(authum.http.HTTPClient):
 class OktaMFARequired(Exception):
     """Raised when multi-factor authentication is required"""
 
-    def __init__(self, client: OktaClient, response: authum.http.RESTResponse) -> None:
+    def __init__(self, client: OktaClient, response: authum.http.RESTResponse):
         self.client = client
         self.response = response
 
@@ -233,7 +233,7 @@ def factor_by_id(response: authum.http.RESTResponse, id: str) -> dict:
 class OktaData(authum.persistence.KeyringItem):
     """Represents persistent Okta data"""
 
-    def __init__(self) -> None:
+    def __init__(self):
         super().__init__("okta")
 
     @property
@@ -249,26 +249,26 @@ class OktaData(authum.persistence.KeyringItem):
         return self.get("password", "")
 
     @property
-    def session(self) -> Type:
+    def session(self) -> OktaClientSession:
         return OktaClientSession(**self.get("session", {}))
 
     @domain.setter
-    def domain(self, v: str) -> None:
+    def domain(self, v: str):
         self["domain"] = v
         self.save()
 
     @username.setter
-    def username(self, v: str) -> None:
+    def username(self, v: str):
         self["username"] = v
         self.save()
 
     @password.setter
-    def password(self, v: str) -> None:
+    def password(self, v: str):
         self["password"] = v
         self.save()
 
     @session.setter
-    def session(self, v: Type) -> None:
+    def session(self, v: Union[OktaClientSession, None]):
         if v:
             self["session"] = dataclasses.asdict(v)
         elif "session" in self:

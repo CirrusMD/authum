@@ -27,7 +27,7 @@ try:
     class ChoiceDialog(sdg.Dialog):
         """Simple dialog box with a button for each choice"""
 
-        def __init__(self, title: str, prompt: str, choices: list) -> None:
+        def __init__(self, title: str, prompt: str, choices: list):
             self.prompt = prompt
             self.choices = choices
 
@@ -35,10 +35,10 @@ try:
             root.withdraw()
             super().__init__(parent=root, title=title)
 
-        def body(self, master: tkinter.Tk) -> None:
+        def body(self, master: tkinter.Tk):
             tkinter.Label(master, text=self.prompt, justify=tkinter.LEFT).pack()
 
-        def buttonbox(self) -> None:
+        def buttonbox(self):
             box = tkinter.Frame(self)
             for i, choice in enumerate(self.choices):
                 tkinter.Button(
@@ -51,7 +51,7 @@ try:
             self.bind("<Return>", lambda event: self.make_choice(0))
             self.bind("<Escape>", lambda event: signal.raise_signal(signal.SIGINT))
 
-        def make_choice(self, choice: int) -> None:
+        def make_choice(self, choice: int):
             self.result = choice
             self.ok()  # type: ignore
 

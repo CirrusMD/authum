@@ -36,7 +36,7 @@ class DuoWebV2:
         duo_form_args: dict = {},
         script_url: str = "https://api.duosecurity.com/frame/hosted/Duo-Web-v2.min.js",
         poll_interval: float = 0.25,
-    ) -> None:
+    ):
         self._app = flask.Flask(__name__)
         self._post_action_proxy = post_action_proxy
         self._post_action_event = threading.Event()
@@ -70,9 +70,9 @@ class DuoWebV2:
             self._post_action_event.set()
 
             response = flask.make_response(self._post_action_response.response.text)
-            response.headers[
-                "Content-Type"
-            ] = self._post_action_response.response.headers["Content-Type"]
+            response.headers["Content-Type"] = (
+                self._post_action_response.response.headers["Content-Type"]
+            )
 
             return response
 
@@ -83,7 +83,7 @@ class DuoWebV2:
         except AttributeError:
             return ""
 
-    def start_server(self) -> None:
+    def start_server(self):
         """Starts the local web server"""
         self._server_host = "127.0.0.1"
         with contextlib.closing(
