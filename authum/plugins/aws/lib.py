@@ -205,6 +205,7 @@ class AWSSSOAuthorization(CacheableAWSObject):
         )
         log.debug(f"AWS response: {authorization}")
 
+        authum.util.rich_stderr.print(f"User code: {authorization['userCode']}")
         if launch_web_browser:
             webbrowser.open(authorization["verificationUriComplete"])
 

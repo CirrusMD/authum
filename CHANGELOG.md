@@ -5,6 +5,7 @@
 - Require Python >=3.9
 - [aws] Add two minute expiration buffer to TTLs to prevent long-running
   commands from failing by starting the renewal process early.
+- [aws] Display AWS user code during device authorization.
 
 ## 1.1.0 - 2022-10-18
 
