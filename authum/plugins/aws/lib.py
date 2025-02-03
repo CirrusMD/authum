@@ -67,6 +67,7 @@ class CacheableAWSObject(abc.ABC):
 
     cache: ClassVar[AWSData] = AWSData()
     expiration_timestamp: float = 0
+    expiration_buffer = datetime.timedelta(minutes=2)
 
     @abc.abstractmethod
     def load(self):
@@ -89,7 +90,7 @@ class CacheableAWSObject(abc.ABC):
         except ValueError:
             expiration = now
 
-        return expiration - now
+        return expiration - now - self.expiration_buffer
 
     @property
     def is_expired(self) -> bool:
