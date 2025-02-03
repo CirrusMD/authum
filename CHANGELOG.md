@@ -6,6 +6,7 @@
 - [aws] Add two minute expiration buffer to TTLs to prevent long-running
   commands from failing by starting the renewal process early.
 - [aws] Display AWS user code during device authorization.
+- [aws] Set `AWS_DEFAULT_REGION` to `us-east-1` by default
 
 ## 1.1.0 - 2022-10-18
 

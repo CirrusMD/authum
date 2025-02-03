@@ -21,6 +21,9 @@ import authum.util
 logging.getLogger("botocore").propagate = False
 log = logging.getLogger(__name__)
 
+if not boto3.Session().region_name:
+    os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
+
 
 class AWSData(authum.persistence.KeyringItem):
     """Represents persistent AWS data"""
