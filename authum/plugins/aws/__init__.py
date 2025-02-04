@@ -98,7 +98,10 @@ def extend_cli(click_group):
     def exec(rotate: bool, name: str, command: tuple):
         """Run a shell command with the selected credentials"""
         aws_data = authum.plugins.aws.lib.AWSData()
-        credentials = aws_data.credentials(name)
+        try:
+            credentials = aws_data.credentials(name)
+        except authum.plugins.aws.lib.NoSuchCredentials:
+            raise click.ClickException(f"No such credentials: {name}")
         credentials.renew(force=rotate)
         executable = os.path.basename(sys.argv[0])
         try:
@@ -120,7 +123,10 @@ def extend_cli(click_group):
     def export(rotate: bool, name: str):
         """Export AWS_* environment variables for the selected credentials"""
         aws_data = authum.plugins.aws.lib.AWSData()
-        credentials = aws_data.credentials(name)
+        try:
+            credentials = aws_data.credentials(name)
+        except authum.plugins.aws.lib.NoSuchCredentials:
+            raise click.ClickException(f"No such credentials: {name}")
         credentials.renew(force=rotate)
         authum.util.rich_stdout.print(credentials.env_vars_export)
 
@@ -189,7 +195,7 @@ def extend_cli(click_group):
         aws_data = authum.plugins.aws.lib.AWSData()
         try:
             aws_data.mv_credentials(current_name, new_name)
-        except KeyError:
+        except authum.plugins.aws.lib.NoSuchCredentials:
             raise click.ClickException(f"No such credentials: {current_name}")
         ctx.invoke(ls)
 
@@ -205,6 +211,6 @@ def extend_cli(click_group):
         elif name:
             try:
                 aws_data.rm_credentials(name)
-            except KeyError:
+            except authum.plugins.aws.lib.NoSuchCredentials:
                 raise click.ClickException(f"No such credentials: {name}")
         ctx.invoke(ls)

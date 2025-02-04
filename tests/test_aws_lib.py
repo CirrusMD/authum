@@ -146,7 +146,7 @@ def test_aws_data(random_string, aws_role_credentials):
     ad.mv_credentials(random_string, new_name)
 
     ad.rm_credentials(new_name)
-    with pytest.raises(KeyError):
+    with pytest.raises(authum.plugins.aws.lib.NoSuchCredentials):
         ad.credentials(new_name)
 
 

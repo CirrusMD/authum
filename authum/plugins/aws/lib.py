@@ -40,7 +40,10 @@ class AWSData(authum.persistence.KeyringItem):
         self, name: str
     ) -> Union["AWSSSORoleCredentials", "AWSSAMLRoleCredentials"]:
         """Return credentials by name"""
-        args = self["credentials"][name]
+        try:
+            args = self["credentials"][name]
+        except KeyError:
+            raise NoSuchCredentials
         if "start_url" in args:
             return AWSSSORoleCredentials(**args)
         else:
@@ -488,6 +491,10 @@ class AWSSAMLRoleCredentials(AWSRoleCredentials):
 
 class AWSPluginError(Exception):
     """Represents AWS plugin errors"""
+
+
+class NoSuchCredentials(AWSPluginError):
+    """Raised when credentials don't exist"""
 
 
 def normalize_start_url(
