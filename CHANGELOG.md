@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 1.2.0 - Pending
+## 1.2.0 - 2025-02-04
 
 - Require Python >=3.9
 - [aws] Add two minute expiration buffer to TTLs to prevent long-running
